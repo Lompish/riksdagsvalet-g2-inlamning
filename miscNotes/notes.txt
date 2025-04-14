@@ -1,0 +1,11 @@
+Listening on http://localhost:3005 <-- Som den här övninge är skriven kommer den alltid att öppna i den här porten
+
+____
+
+Jag kommer välja att ignorera geografisk data eftersom undersökningens underlag är så litet i relation till folkmängd fördelat på stad samt andelen inskrivna studenter på lärosäten per stad. 
+
+Till exempel hade Delhi 2021 en folkmängd på 31181000 personer varav 299597 collegestudenter (Ej universitet). Undersökningen har 768 respondenter från Delhi.
+
+Källa: https://www.macrotrends.net/global-metrics/cities/21228/delhi/population, 
+       https://www.ceicdata.com/en/india/number-of-students-colleges/number-of-students-delhi-colleges
+

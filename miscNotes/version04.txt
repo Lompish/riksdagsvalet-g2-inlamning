@@ -1,0 +1,22 @@
+Placera dina JavaScript (nu kan de vara flera, ett per webbsida) i mappen js (istället för som tidigare ett enda script, main.js på grundnivå).
+En include med en funktion du kan anropa för att bygga en meny och därmed ha flera sidor på en webbplats createMenu. Notera att detta anrop ska ske i en fil som har namnet _menu.js. I denna kan du välja vad olika menyval ska heta och vilket javascript som ska köras när ett visst menyval görs! Du kan även skapa undermenyer. Se detta exempel som ingår i mallen, version 4:
+
+js/_menu.js
+
+import createMenu from './libs/createMenu.js';
+
+
+createMenu('Husdjur & ägare', [
+
+  { name: 'Ägare', script: 'pet-owners.js' },
+  { name: 'Husdjur', script: 'pets.js' },
+  { name: 'Ägare & husdjur', script: 'pet-owners-and-pets.js' },
+  {
+    name: 'Djurlösa & ägarlösa',
+    sub: [
+      { name: 'Husdjursägare utan husdjur', script: 'petowners-without-pets.js' },
+      { name: 'Husdjur utan ägare', script: 'pets-without-owners.js' }
+    ]
+  },
+  { name: 'Husdjursarter', script: 'pet-species-pie-chart.js' }
+]);
