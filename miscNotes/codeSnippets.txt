@@ -1,0 +1,139 @@
+let years = (await dbQuery(
+  'SELECT DISTINCT year FROM dataWithMonths'
+)).map(x => x.year);
+
+let year1 = addDropdown('År 1', years, 1964);
+let year2 = addDropdown('År 2', years, 2024);
+
+addMdToPage(`
+  ## Medeltemperaturer i Malmö, jämförelse mellan år ${year1} och år ${year2}
+`);
+
+// in order to get the two years to compare
+// we perform a join between two subselects
+let dataForChart = await dbQuery(`
+  SELECT monthName1 AS monthName, temp1, temp2 FROM
+    (SELECT monthNameShort AS monthName1, temperatureC AS temp1 FROM dataWithMonths WHERE year = '${year1}') AS t1,
+    (SELECT monthNameShort AS monthName2, temperatureC AS temp2 FROM dataWithMonths WHERE year = '${year2}') AS t2
+  WHERE t1.monthName1 = t2.monthName2
+`);
+
+drawGoogleChart({
+  type: 'LineChart',
+  data: makeChartFriendly(dataForChart, 'månad', `°C ${year1}`, `°C ${year2}`),
+  options: {
+    height: 500,
+    chartArea: { left: 50, right: 0 },
+    curveType: 'function',
+    pointSize: 5,
+    pointShape: 'circle',
+    vAxis: { format: '# °C' },
+    title: `Medeltemperatur per månad i Malmö, jämförelse mellan år ${year1} och ${year2} (°C)`
+  }
+});
+
+// the same db query as before, but with the long month names
+let dataForTable = await dbQuery(`
+  SELECT monthName1 AS monthName, temp1, temp2 FROM
+    (SELECT monthName AS monthName1, temperatureC AS temp1 FROM dataWithMonths WHERE year = '${year1}') AS t1,
+    (SELECT monthName AS monthName2, temperatureC AS temp2 FROM dataWithMonths WHERE year = '${year2}') AS t2
+  WHERE t1.monthName1 = t2.monthName2
+`);
+
+tableFromData({
+  data: dataForTable,
+  columnNames: ['Månad', `Medeltemperatur (°C) ${year1}`, `Medeltemperatur (°C) ${year2}`]
+});
+
+let years = (await dbQuery(
+  'SELECT DISTINCT year FROM dataWithMonths'
+)).map(x => x.year);
+
+let currentYear = addDropdown('År', years, 2024);
+
+addMdToPage(`
+  ## Medeltemperaturer i Malmö ${currentYear}
+`);
+
+let dataForChart = await dbQuery(
+  `SELECT monthNameShort, temperatureC FROM dataWithMonths WHERE year = '${currentYear}'`
+);
+
+drawGoogleChart({
+  type: 'LineChart',
+  data: makeChartFriendly(dataForChart, 'månad', '°C'),
+  options: {
+    height: 500,
+    chartArea: { left: 50, right: 0 },
+    curveType: 'function',
+    pointSize: 5,
+    pointShape: 'circle',
+    vAxis: { format: '# °C' },
+    title: `Medeltemperatur per månad i Malmö ${currentYear} (°C)`
+  }
+});
+
+// the same db query as before, but with the long month names
+let dataForTable = await dbQuery(
+  `SELECT monthName, temperatureC FROM dataWithMonths WHERE year = '${currentYear}'`
+);
+
+tableFromData({
+  data: dataForTable,
+  columnNames: ['Månad', 'Medeltemperatur (°C)']
+});
+
+addMdToPage(`
+  ### I version 7 av mallen har databashanteringen utökats!
+
+  **Viktigt**: En "breaking change" mellan version 6 och 7 är att mappen *sqlite-databases* inte längre finns, istället finns det en mapp som heter *databases* - och nu stöds SQLite, MySQL, MongoDB och Neo4j.
+
+  Läs mer om hur databaser kopplas in [i den inbyggda dokumentationen](/docs/#mappen-databases). Nu kan du ha hur många databaser inkopplade som helst (nästan)!
+
+  #### Visste du det här om våra län?
+  Den här datan kommer från SQLite-databasen **counties**, medan annan data (på andra sidor) kommer från SQLite-databasen **smhi-temp-and-rainfall-malmo**. Men vi hade absolut kunnat blanda data från flera databaser på en sida!
+`);
+
+dbQuery.use('counties-sqlite');
+let countyInfo = await dbQuery('SELECT * FROM countyInfo');
+tableFromData({ data: countyInfo });
+
+let years = (await dbQuery(
+  'SELECT DISTINCT year FROM dataWithMonths'
+)).map(x => x.year);
+
+let year1 = addDropdown('År 1', years, 1961);
+let year2 = addDropdown('År 2', years, 2024);
+
+// if year1 > year2 then switch the years
+if (year1 > year2) {
+  [year1, year2] = [year2, year1];
+}
+
+addMdToPage(`
+  ## Hitta trender, från år ${year1} till år ${year2}
+`);
+
+let dataForChart = (await dbQuery(`
+  SELECT year, AVG(temperatureC) AS avgTemperature
+  FROM dataWithMonths
+  WHERE year >= '${year1}' AND year <= '${year2}'
+  GROUP BY year
+`)).map(x => ({ ...x, year: +x.year })); // map to make year a number
+
+drawGoogleChart({
+  type: 'LineChart',
+  data: makeChartFriendly(dataForChart, 'månad', `°C`),
+  options: {
+    height: 500,
+    chartArea: { left: 50, right: 0 },
+    curveType: 'function',
+    pointSize: 5,
+    pointShape: 'circle',
+    vAxis: { format: '# °C' },
+    title: `Medeltemperatur per år i Malmö, trend mellan åren ${year1} och ${year2} (°C)`,
+    trendlines: { 0: { color: 'green', pointSize: 0 } },
+    hAxis: { format: "#" } // prevents years to be displayed as numbers
+  }
+});
+
