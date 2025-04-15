@@ -1,8 +1,6 @@
 import './libs/liveReload.js';
 import addMdToPage from './libs/addMdToPage.js';
 
-
-
 addMdToPage(`
 ##Påverkar inkomstnivå politiska rörelsemönster i svenska kommuner? 
 
