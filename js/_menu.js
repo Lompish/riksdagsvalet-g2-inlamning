@@ -1,4 +1,4 @@
-createMenu('Tjena kexet, står du här och smular', [
+createMenu('Inkomstnivå och valresultat i svenska kommuner', [
   { name: 'Översikt', script: 'overview.js' },
   { name: 'Sida ett', script: 'placeholder.js' },
   { name: 'Sida två', script: 'placeholder.js' },
