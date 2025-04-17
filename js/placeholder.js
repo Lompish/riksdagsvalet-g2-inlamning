@@ -8,4 +8,4 @@ addMdToPage(`
 Här står det bara lite olika saker
 `);
 
-tableFromData({ data: vars.municipalities });
+tableFromData({ data: vars.municipalities, columnNames: ['Kommun'] });
