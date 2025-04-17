@@ -1,0 +1,7 @@
+riksdagsval-neo4j
+kommun-info-mongodb
+geo-mysql
+unemployed-sqlite
+education-sqlite
+eligibleVotersEducation-sqlite
+eligibleVotersAge-sqlite
