@@ -19,11 +19,24 @@ addMdToPage(`
 
 dbQuery.use('eligibleVotersAge-sqlite');
 
-let counties = await dbQuery(`
-  SELECT DISTINCT municipality
-  AS 'Kommun'
-  FROM eligibleVotersAge
-  `);
-tableFromData({ data: counties });
+let totalEligibleVotersMunicipality2018 = await dbQuery(`
+SELECT municipality, age, eligibleVoters2018, eligibleVoters2022
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar'
+GROUP BY municipality;
+`);
+tableFromData({
+  data: totalEligibleVotersMunicipality2018.slice(0, 5),
+  columnNames: ['Kommun', 'Ålderskategori', 'Totalt antal röstberättigade 2018', 'Totalt antal röstberättigade 2022'],
+});
 
+dbQuery.use('unemployed-sqlite');
+
+let unemployedPerMunicipalityAge2018 = await dbQuery(`
+  SELECT * FROM unemployed;
+  `);
+tableFromData({
+  data: unemployedPerMunicipalityAge2018.slice(0, 5),
+  columnNames: ['Kommun', 'År', 'Arbetslösa'],
+});
 
