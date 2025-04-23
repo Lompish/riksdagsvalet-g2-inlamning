@@ -43,7 +43,7 @@ meanIncomes18.sort((a, b) => b.medelInkomst2018 - a.medelInkomst2018);
 
 drawGoogleChart({
   type: 'ColumnChart',
-  data: makeChartFriendly(meanIncomes18, 'Kommun', 'MedelInkomst2018'),
+  data: makeChartFriendly(meanIncomes18, 'Kommun', 'Medel Inkomst 2018'),
   options: {
     title: 'Medelinkomst 2018 i alla kommuner (TSEK)',
     height: 600,
@@ -75,7 +75,7 @@ meanIncomes.sort((a, b) => b.medelInkomst2022 - a.medelInkomst2022);
 
 drawGoogleChart({
   type: 'ColumnChart',
-  data: makeChartFriendly(meanIncomes, 'kommun', 'medelInkomst2022'),
+  data: makeChartFriendly(meanIncomes, 'Kommun', 'Medel Inkomst 2022'),
   options: {
     title: 'Medelinkomst 2022 i alla kommuner (TSEK)',
     height: 600,
@@ -164,9 +164,146 @@ let meanIncomesTop102022 = kommunerTop102022
 
 meanIncomesTop102022.sort((a, b) => a.medelInkomst2022 - b.medelInkomst2022);
 
-let bottom102022 = meanIncomesTop102022.slice(0, 10);
+let bottom2022 = meanIncomesTop102022.slice(0, 10);
 
 tableFromData({
-  data: bottom102022,
+  data: bottom2022,
   columnNames: ['Kommun', 'Medelinkomst 2022 (TSEK)']
 });
+
+addMdToPage(`
+  <br/>`)
+
+let kommunerProcent = await dbQuery.collection('incomeByKommun')
+  .find({ kon: 'totalt' })
+
+// Räkna ut procentuell förändring mellan 2018 och 2022
+let kommunerMedFörändring = kommunerProcent
+  .filter(x => x.medelInkomst2018 != null && x.medelInkomst2022 != null && x.medelInkomst2018 !== 0)
+  .map(x => {
+    let procentFörändring = ((x.medelInkomst2022 - x.medelInkomst2018) / x.medelInkomst2018) * 100;
+    return {
+      kommun: x.kommun,
+      medelInkomst2018: x.medelInkomst2018,
+      medelInkomst2022: x.medelInkomst2022,
+      förändringProcent: parseFloat(procentFörändring.toFixed(2))
+    };
+  });
+
+// Sortera efter minst ökning (eller minskning först)
+kommunerMedFörändring.sort((a, b) => a.förändringProcent - b.förändringProcent);
+
+let bottom10Procent = kommunerMedFörändring.slice(0, 10);
+
+// Visa som tabell
+tableFromData({
+  data: bottom10Procent,
+  columnNames: [
+    'Kommun',
+    'Medelinkomst 2018 (TSEK)',
+    'Medelinkomst 2022 (TSEK)',
+    'Förändring (%)'
+  ]
+});
+
+
+addMdToPage(`
+  <br/>`)
+
+// Hämta all data (vi tar bara en gång, inte två gånger)
+let kommunerChange = await dbQuery.collection('incomeByKommun')
+  .find({ kon: 'totalt' })
+
+// Filtrera bort poster utan inkomstuppgifter
+let filtrerade = kommunerChange.filter(x =>
+  x.medelInkomst2018 != null &&
+  x.medelInkomst2022 != null &&
+  x.medelInkomst2018 !== 0
+);
+
+// Räkna ut procentuell förändring
+let kommunerFörändring = filtrerade.map(x => {
+  let förändring = ((x.medelInkomst2022 - x.medelInkomst2018) / x.medelInkomst2018) * 100;
+  return {
+    kommun: x.kommun,
+    medelInkomst2018: x.medelInkomst2018,
+    medelInkomst2022: x.medelInkomst2022,
+    förändringProcent: parseFloat(förändring.toFixed(2))
+  };
+});
+
+// Sortera på 2018 års inkomst för att hitta kommuner med lägst nivå från början
+kommunerFörändring.sort((a, b) => a.medelInkomst2018 - b.medelInkomst2018);
+
+// Ta ut de 10 kommuner som hade lägst inkomst 2018
+let bottom10Change = kommunerFörändring.slice(0, 10);
+
+// Visa tabell med både inkomster och procentuell förändring
+tableFromData({
+  data: bottom10Change,
+  columnNames: [
+    'Kommun',
+    'Medelinkomst 2018 (TSEK)',
+    'Medelinkomst 2022 (TSEK)',
+    'Förändring (%)'
+  ]
+});
+
+addMdToPage(`
+  <br/>`)
+
+// Visa som stapeldiagram (procentuell förändring)
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: [
+    ['Kommun', 'Förändring (%)'],
+    ...bottom10Change.map(x => [x.kommun, x.förändringProcent])
+  ],
+  options: {
+    title: 'Procentuell förändring i medelinkomst (2018–2022) – Kommuner med lägst inkomst 2018',
+    height: 500,
+    chartArea: { left: 60, bottom: 120 },
+    vAxis: { title: 'Förändring (%)' },
+    hAxis: { slantedText: true, slantedTextAngle: 45 }
+  }
+});
+
+addMdToPage(`
+  ## Ang tabellen ovan:
+  
+  Ovan ser vi att de kommuner som hade lägst medelinkomst 2018 och kan välja ut de 5 kommuner, av de 10 kommuner som vi valde att titta på från början, som har haft den minsta ökningen i medelinkomst mellan 2018 och 2022.
+
+  Vi ser att Filipstad, Ljusnarsberg, Hultsfred, Perstorp och Hällefors är de 5 kommuner som har haft den minsta ökningen i medelinkomst mellan 2018 och 2022. Likaså kan vi se att Högsby, Åsele, Bjurholm, Lessebo och Gulspång har ökat sin medelinkomst något mer av de 10 kommuner som vi valde att titta på från början.
+
+  Det gör det intressant att se hur partistödet har förändrats i dessa kommuner. Har de partier som är i opposition bibehållit sitt stöd? 
+  `)
+
+/* MATCH (n:Partiresultat)
+WHERE n.kommun = "Filipstad"
+RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
+ORDER BY n.roster2022 DESC
+LIMIT 1 */
+
+
+dbQuery.use('riksdagsval-neo4j');
+
+let result = await dbQuery.run(`
+  MATCH (n:Partiresultat)
+  WHERE n.kommun = "Filipstad"
+  RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
+  ORDER BY n.roster2018 DESC
+  LIMIT 1
+`);
+
+let municipalities = result.map(x => ({
+  name: x.Kommun,
+  party: x.Parti,
+  votes2018: x.Röster_2018,
+  votes2022: x.Röster_2022
+}));
+
+tableFromData({
+  data: municipalities,
+  columnNames: ['Kommun', 'Parti', 'Röster 2018', 'Röster 2022']
+});
+
