@@ -1,7 +1,7 @@
-import tableFromData from './libs/tableFromData.js'
-import addDropdown from './libs/addDropdown.js';
-import drawGoogleChart from './libs/drawGoogleChart.js';
-import makeChartFriendly from './libs/makeChartFriendly.js';
+//import tableFromData from './libs/tableFromData.js'
+//import drawGoogleChart from './libs/drawGoogleChart.js';
+//import makeChartFriendly from './libs/makeChartFriendly.js';
+//import addDropdown from './libs/addDropdown.js';
 
 addMdToPage(`
 
@@ -17,26 +17,134 @@ addMdToPage(`
 
 `);
 
+dbQuery.use('unemployed-sqlite');
+
+let unemployed2018 = await dbQuery(`
+SELECT 
+  municipality, 
+  ROUND(AVG(unemployedTotal)), 
+  '2018' AS period
+FROM unemployed
+WHERE period LIKE '2018%'
+GROUP BY municipality;
+`);
+
+tableFromData({
+  data: unemployed2018.slice(0, 5),
+  columnNames: ['Kommun', 'Antal arbetslösa (genomsnitt/år)', 'Period']
+});
+
 dbQuery.use('eligibleVotersAge-sqlite');
 
 let totalEligibleVotersMunicipality2018 = await dbQuery(`
-SELECT municipality, age, eligibleVoters2018, eligibleVoters2022
+SELECT municipality, eligibleVoters2018
 FROM eligibleVotersAge
-WHERE age = 'samtliga åldrar'
-GROUP BY municipality;
+WHERE age = 'samtliga åldrar' AND gender = 'totalt'
+GROUP BY municipality
+LIMIT 5;
 `);
 tableFromData({
   data: totalEligibleVotersMunicipality2018.slice(0, 5),
-  columnNames: ['Kommun', 'Ålderskategori', 'Totalt antal röstberättigade 2018', 'Totalt antal röstberättigade 2022'],
+  columnNames: ['Kommun', 'Totalt antal röstberättigade 2018'],
 });
 
 dbQuery.use('unemployed-sqlite');
 
-let unemployedPerMunicipalityAge2018 = await dbQuery(`
-  SELECT * FROM unemployed;
-  `);
+let unemployed2022 = await dbQuery(`
+SELECT 
+  municipality, 
+  ROUND(AVG(unemployedTotal)), 
+  '2022' AS period
+FROM unemployed
+WHERE period LIKE '2022%'
+GROUP BY municipality;
+`);
+
 tableFromData({
-  data: unemployedPerMunicipalityAge2018.slice(0, 5),
-  columnNames: ['Kommun', 'År', 'Arbetslösa'],
+  data: unemployed2022.slice(0, 5),
+  columnNames: ['Kommun', 'Antal arbetslösa (genomsnitt/år)', 'Period']
 });
 
+
+
+dbQuery.use('eligibleVotersAge-sqlite');
+
+let totalEligibleVotersMunicipality2022 = await dbQuery(`
+SELECT DISTINCT municipality, eligibleVoters2022
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar' AND gender = 'totalt'
+GROUP BY municipality
+LIMIT 5;
+`);
+tableFromData({
+  data: totalEligibleVotersMunicipality2022.slice(0, 5),
+  columnNames: ['Kommun', 'Totalt antal röstberättigade 2022'],
+});
+
+console.log('totalEligibleVotersMunicipality2018', totalEligibleVotersMunicipality2018);
+console.log('totalEligibleVotersMunicipality2022', totalEligibleVotersMunicipality2022);
+
+// The equivalent of SELECT DISTINCT municipality, eligibleVoters2018, eligibleVoters2022
+let totalEligibleVotersMunicipality2018And2022 = totalEligibleVotersMunicipality2018.map(
+  (x, i) => ({ ...x, eligibleVoters2022: totalEligibleVotersMunicipality2022[i].eligibleVoters2022 }));
+console.log('totalEligibleVotersMunicipality2018And2022', totalEligibleVotersMunicipality2018And2022);
+
+let dataToShowVoters;
+let year = addDropdown('År', [2018, 2022, 'Båda']);
+if (year == 2018) {
+  dataToShowVoters = totalEligibleVotersMunicipality2018;
+}
+else if (year == 2022) {
+  dataToShowVoters = totalEligibleVotersMunicipality2022;
+}
+else {
+  dataToShowVoters = totalEligibleVotersMunicipality2018And2022;
+}
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: makeChartFriendly(dataToShowVoters),
+  options: {
+    title: 'Antal röstberättigade per kommun',
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    }
+  }
+});
+
+
+/*drawGoogleChart({
+  type: 'LineChart',
+  data: makeChartFriendly(temperatures2024, 'Månad', 'Temperatur (°C)'),
+  options: {
+    title: 'Medeltemperaturer i Stockholm 2024, månad för månad',
+    height: 500,
+    curveType: 'function',
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    }
+  }
+});
+
+dbQuery.use('unemployed-sqlite');
+
+let totalUnemployedMunicipalityPeriod = await dbQuery(`
+ SELECT 
+  municipality,
+  SUBSTRING(period, 1, 4) AS year,
+  ROUND(AVG(unemployedTotal)) AS average_unemployed
+FROM unemployed
+WHERE (period LIKE '2018%' OR period LIKE '2022%')
+GROUP BY municipality, SUBSTRING(period, 1, 4)
+ORDER BY municipality, year;
+  `);
+tableFromData({
+  data: totalUnemployedMunicipalityPeriod.slice(0, 5),
+  columnNames: ['Kommun', 'Period', 'Arbetslösa'],
+});
+*/
