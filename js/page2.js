@@ -29,6 +29,8 @@ addMdToPage(`
 
 dbQuery.use('kommun-info-mongodb');
 
+let year = addDropdown('År', [2018, 2022, 'Båda']);
+
 let kommuner18 = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
 
@@ -37,32 +39,15 @@ let meanIncomes18 = kommuner18.map(x => ({
   medelInkomst2018: x.medelInkomst2018
 }));
 
+
 meanIncomes18 = meanIncomes18.filter(x => x.medelInkomst2018 != null);
 
 meanIncomes18.sort((a, b) => b.medelInkomst2018 - a.medelInkomst2018);
 
-drawGoogleChart({
-  type: 'ColumnChart',
-  data: makeChartFriendly(meanIncomes18, 'Kommun', 'Medel Inkomst 2018'),
-  options: {
-    title: 'Medelinkomst 2018 i alla kommuner (TSEK)',
-    height: 600,
-    chartArea: { left: 50, bottom: 150 },
-    vAxis: { title: 'Inkomst (TSEK)' },
-    hAxis: {
-      slantedText: true,
-      slantedTextAngle: 45
-    }
-  }
-});
-
-
-addMdToPage(`
-  <br/>`)
-
 
 let kommuner = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
+
 
 let meanIncomes = kommuner.map(x => ({
   kommun: x.kommun,
@@ -72,25 +57,6 @@ let meanIncomes = kommuner.map(x => ({
 meanIncomes = meanIncomes.filter(x => x.medelInkomst2022 != null);
 
 meanIncomes.sort((a, b) => b.medelInkomst2022 - a.medelInkomst2022);
-
-drawGoogleChart({
-  type: 'ColumnChart',
-  data: makeChartFriendly(meanIncomes, 'Kommun', 'Medel Inkomst 2022'),
-  options: {
-    title: 'Medelinkomst 2022 i alla kommuner (TSEK)',
-    height: 600,
-    chartArea: { left: 50, bottom: 150 },
-    vAxis: { title: 'Inkomst (TSEK)' },
-    hAxis: {
-      slantedText: true,
-      slantedTextAngle: 45
-    }
-  }
-});
-
-addMdToPage(`
-  <br/>`)
-
 
 let kommunerTotalt = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
@@ -104,27 +70,40 @@ let meanIncomesTotalt = kommuner
     medelInkomst2022: x.medelInkomst2022
   }));
 
-
 meanIncomesTotalt.sort((a, b) => b.medelInkomst2022 - a.medelInkomst2022);
+
+let chart1data, title;
+if (year == 2018) {
+  chart1data = meanIncomes18;
+  title = 'Medelinkomst 2018 i alla kommuner (TSEK)';
+}
+else if (year == 2022) {
+  chart1data = meanIncomes;
+  title = 'Medelinkomst 2022 i alla kommuner (TSEK)';
+}
+else {
+  chart1data = meanIncomesTotalt;
+  title = 'Medelinkomst 2018 och 2022 i alla kommuner (TSEK)';
+}
+
 
 drawGoogleChart({
   type: 'ColumnChart',
-  data: [
-    ['Kommun', '2018', '2022'],
-    ...meanIncomesTotalt.map(x => [x.kommun, x.medelInkomst2018, x.medelInkomst2022])
-  ],
+  data: makeChartFriendly(chart1data, 'Kommun', 'Medel Inkomst 2018'),
   options: {
-    title: 'Medelinkomst per kommun: 2018 vs 2022',
+    title,
     height: 600,
     chartArea: { left: 50, bottom: 150 },
-    vAxis: { title: 'Inkomst (TSEK)', minValue: 0 },
-    hAxis: { slantedText: true, slantedTextAngle: 45 },
-    seriesType: 'bars',
-    isStacked: false
+    vAxis: { title: 'Inkomst (TSEK)' },
+    hAxis: {
+      slantedText: true,
+      slantedTextAngle: 45
+    }
   }
 });
 
 
+// tabell ovan 
 addMdToPage(`
   <br/>`)
 
@@ -148,6 +127,7 @@ tableFromData({
   columnNames: ['Kommun', 'Medelinkomst 2018 (TSEK)']
 });
 
+// tabell ovan
 
 addMdToPage(`
   <br/>`)
@@ -170,6 +150,9 @@ tableFromData({
   data: bottom2022,
   columnNames: ['Kommun', 'Medelinkomst 2022 (TSEK)']
 });
+
+
+// tabell ovan
 
 addMdToPage(`
   <br/>`)
@@ -206,6 +189,7 @@ tableFromData({
   ]
 });
 
+// tabell ovan
 
 addMdToPage(`
   <br/>`)
@@ -249,6 +233,10 @@ tableFromData({
   ]
 });
 
+
+// tabell ovan
+
+
 addMdToPage(`
   <br/>`)
 
@@ -267,7 +255,7 @@ drawGoogleChart({
     hAxis: { slantedText: true, slantedTextAngle: 45 }
   }
 });
-
+/*
 addMdToPage(`
   ## Ang tabellen ovan:
   
@@ -277,7 +265,7 @@ addMdToPage(`
 
   Det gör det intressant att se hur partistödet har förändrats i dessa kommuner. Har de partier som är i opposition bibehållit sitt stöd? 
   `)
-
+*/
 /* MATCH (n:Partiresultat)
 WHERE n.kommun = "Filipstad"
 RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
@@ -287,7 +275,7 @@ LIMIT 1 */
 
 dbQuery.use('riksdagsval-neo4j');
 
-let result = await dbQuery.run(`
+let result = await dbQuery(`
   MATCH (n:Partiresultat)
   WHERE n.kommun = "Filipstad"
   RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
@@ -306,4 +294,3 @@ tableFromData({
   data: municipalities,
   columnNames: ['Kommun', 'Parti', 'Röster 2018', 'Röster 2022']
 });
-
