@@ -17,12 +17,14 @@ addMdToPage(`
 
 `);
 
+/*
+
 dbQuery.use('unemployed-sqlite');
 
 let unemployed2018 = await dbQuery(`
 SELECT 
   municipality, 
-  ROUND(AVG(unemployedTotal)), 
+  ROUND(AVG(unemployedTotal)) AS unemployed, 
   '2018' AS period
 FROM unemployed
 WHERE period LIKE '2018%'
@@ -32,6 +34,82 @@ GROUP BY municipality;
 tableFromData({
   data: unemployed2018.slice(0, 5),
   columnNames: ['Kommun', 'Antal arbetslösa (genomsnitt/år)', 'Period']
+});
+
+dbQuery.use('unemployed-sqlite');
+
+let unemployed2022 = await dbQuery(`
+SELECT 
+  municipality, 
+  ROUND(AVG(unemployedTotal)) AS unemployed, 
+  '2022' AS period
+FROM unemployed
+WHERE period LIKE '2022%'
+GROUP BY municipality;
+`);
+
+tableFromData({
+  data: unemployed2022.slice(0, 5),
+  columnNames: ['Kommun', 'Antal arbetslösa (genomsnitt/år)', 'Period']
+});
+
+let unemployed2018And2022 = await dbQuery(`
+SELECT 
+  municipality, 
+  ROUND(AVG(unemployedTotal)) AS unemployed, 
+  SUBSTRING(period,1,4) AS year
+FROM unemployed
+GROUP BY municipality, year;
+`);
+
+// convert data so that we have both unemployed data columns in one row
+let only2018 = unemployed2018And2022.filter(x => x.year == '2018');
+let only2022 = unemployed2018And2022.filter(x => x.year == '2022');
+unemployed2018And2022 = only2018
+  .map(x => ({ municipality: x.municipality, unemployed2018: x.unemployed }))
+  .map(x => ({ ...x, unemployed2022: only2022.find(y => y.municipality == x.municipality).unemployed }));
+
+tableFromData({
+  data: unemployed2018And2022.slice(0, 5),
+  columnNames: ['Kommun', 'Antal arbetslösa (genomsnitt/period)', 'Period']
+});
+
+
+let totalEligibleVotersMunicipality2018And2022 = totalEligibleVotersMunicipality2018.map(
+  (x, i) => ({ ...x, eligibleVoters2022: totalEligibleVotersMunicipality2022[i].eligibleVoters2022 }));
+console.log('totalEligibleVotersMunicipality2018And2022', totalEligibleVotersMunicipality2018And2022);
+
+
+let dataToShowUnemployed;
+let yearUnemployed = addDropdown('År', [2018, 2022, 'Båda']);
+if (yearUnemployed == 2018) {
+  dataToShowUnemployed = unemployed2018;
+}
+else if (yearUnemployed == 2022) {
+  dataToShowUnemployed = unemployed2022;
+}
+else {
+  dataToShowUnemployed = unemployed2018And2022;
+}
+
+
+//console.log("THE THANG WE SHOW IN DA DIAGRAM", [...new Set(dataToShowUnemployed.map(x => typeof x.municipality))])
+
+console.log("AHGAIN", dataToShowUnemployed)
+dataToShowUnemployed.forEach(x => delete x.period);
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: makeChartFriendly(dataToShowUnemployed),
+  options: {
+    title: 'Antal arbetslösa per kommun ' + yearUnemployed,
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    }
+  }
 });
 
 dbQuery.use('eligibleVotersAge-sqlite');
@@ -47,27 +125,6 @@ tableFromData({
   data: totalEligibleVotersMunicipality2018.slice(0, 5),
   columnNames: ['Kommun', 'Totalt antal röstberättigade 2018'],
 });
-
-dbQuery.use('unemployed-sqlite');
-
-let unemployed2022 = await dbQuery(`
-SELECT 
-  municipality, 
-  ROUND(AVG(unemployedTotal)), 
-  '2022' AS period
-FROM unemployed
-WHERE period LIKE '2022%'
-GROUP BY municipality;
-`);
-
-tableFromData({
-  data: unemployed2022.slice(0, 5),
-  columnNames: ['Kommun', 'Antal arbetslösa (genomsnitt/år)', 'Period']
-});
-
-
-
-dbQuery.use('eligibleVotersAge-sqlite');
 
 let totalEligibleVotersMunicipality2022 = await dbQuery(`
 SELECT DISTINCT municipality, eligibleVoters2022
@@ -115,8 +172,7 @@ drawGoogleChart({
   }
 });
 
-
-/*drawGoogleChart({
+drawGoogleChart({
   type: 'LineChart',
   data: makeChartFriendly(temperatures2024, 'Månad', 'Temperatur (°C)'),
   options: {
