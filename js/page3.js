@@ -39,7 +39,7 @@ GROUP BY municipality;
 
 tableFromData({
   data: population2018And2022.slice(0, 5),
-  //columnNames: ['Kommun', 'Folkmängd 2018', 'Folkmängd 2022']
+  columnNames: ['Kommun', 'År', 'Folkmängd (I ålder: 18-100)']
 });
 
 let population2018 = population2018And2022
@@ -51,11 +51,12 @@ let population2022 = population2018And2022
   .map(({ municipality, population }) => ({ municipality, population }));
 
 
-let totalpopulation = population2018And2022
+let populationBothYears = population2018And2022
   .map(x => ({ municipality: x.municipality, population2018: x.population }))
   .map(x => ({ ...x, population2022: population2022.find(y => y.municipality == x.municipality).population }));
 
 let populationForChart;
+
 let populationYear = addDropdown('År', [2018, 2022, 'Samtliga']);
 if (populationYear == 2018) {
   populationForChart = population2018;
@@ -64,15 +65,15 @@ else if (populationYear == 2022) {
   populationForChart = population2022;
 }
 else if (populationYear == 'Samtliga') {
-  populationForChart = totalUnemployed;
+  populationForChart = populationBothYears;
 }
 
-/*
+
 drawGoogleChart({
   type: 'ColumnChart',
   data: makeChartFriendly(populationForChart),
   options: {
-    title: 'Folkmängd åldrar 18-64 år, per kommun ' + populationYear,
+    title: 'Folkmängd åldrar 18-100 år, per kommun ' + populationYear,
     height: 500,
     chartArea: { left: 80 },
     hAxis: {
@@ -81,7 +82,6 @@ drawGoogleChart({
     }
   }
 });
-*/
 
 
 /*
