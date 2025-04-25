@@ -14,11 +14,11 @@ addMdToPage(`
 `);
 
 dbQuery.use('population-sqlite');
-let population = await dbQuery(`
+let population2018And2022 = await dbQuery(`
 SELECT
 municipality,
-  ROUND(SUM("2018M09")) AS population2018,
-    ROUND(SUM("2022M09")) AS population2022
+  ROUND(SUM("2018M09")),
+    ROUND(SUM("2022M09"))
 FROM population
 WHERE age >= 18 AND age <= 100
 AND(gender = 'män' OR gender = 'kvinnor')
@@ -26,8 +26,29 @@ GROUP BY municipality;
 `);
 
 tableFromData({
-  data: population.slice(0, 5)
+  data: population2018And2022.slice(0, 5),
+  columnNames: ['Kommun', 'Folkmängd 2018', 'Folkmängd 2022']
 });
+
+let population2018 = population2018And2022
+  .filter(x => x.year == '2018')
+  .map(({ municipality, population }) => ({ municipality, population }));
+
+let population2022 = population2018And2022
+  .filter(x => x.year == '2022')
+  .map(({ municipality, population }) => ({ municipality, population }));
+
+
+let totalpopulation = population2018And2022
+  .map(x => ({ municipality: x.municipality, population2018: x.population }))
+  .map(x => ({ ...x, population2022: population2022.find(y => y.municipality == x.municipality).population }));
+
+console.log('2018', population2018)
+console.log('2022', population2022)
+console.log('total', totalpopulation)
+
+
+
 
 dbQuery.use('unemployed-sqlite');
 
