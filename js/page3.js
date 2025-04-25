@@ -1,7 +1,3 @@
-//import tableFromData from './libs/tableFromData.js'
-//import drawGoogleChart from './libs/drawGoogleChart.js';
-//import makeChartFriendly from './libs/makeChartFriendly.js';
-//import addDropdown from './libs/addDropdown.js';
 
 addMdToPage(`
 
@@ -16,6 +12,61 @@ addMdToPage(`
 <br>
 
 `);
+
+dbQuery.use('unemployed-sqlite');
+
+let unemployed2018And2022 = await dbQuery(`
+SELECT 
+  municipality, 
+  ROUND(AVG(unemployedTotal)) AS unemployed, 
+  SUBSTRING(period,1,4) AS year
+FROM unemployed
+GROUP BY municipality, year;
+`);
+
+let unemployed2018 = unemployed2018And2022
+  .filter(x => x.year == '2018')
+  .map(({ municipality, unemployed }) => ({ municipality, unemployed }));
+
+let unemployed2022 = unemployed2018And2022
+  .filter(x => x.year == '2022')
+  .map(({ municipality, unemployed }) => ({ municipality, unemployed }));
+
+
+let totalUnemployed = unemployed2018And2022
+  .map(x => ({ municipality: x.municipality, unemployed2018: x.unemployed }))
+  .map(x => ({ ...x, unemployed2022: unemployed2022.find(y => y.municipality == x.municipality).unemployed }));
+
+console.log('2018', unemployed2018)
+console.log('2022', unemployed2022)
+console.log('total', totalUnemployed)
+
+let unemployedForChart;
+let year = addDropdown('År', [2018, 2022, 'Samtliga']);
+if (year == 2018) {
+  unemployedForChart = unemployed2018;
+}
+else if (year == 2022) {
+  unemployedForChart = unemployed2022;
+}
+else if (year == 'Samtliga') {
+  unemployedForChart = totalUnemployed;
+}
+
+
+drawGoogleChart({
+  type: 'ScatterChart',
+  data: makeChartFriendly(unemployedForChart),
+  options: {
+    title: 'Antal arbetslösa per kommun ' + year,
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    }
+  }
+});
 
 /*
 
