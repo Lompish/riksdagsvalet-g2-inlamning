@@ -13,6 +13,22 @@ addMdToPage(`
 
 `);
 
+dbQuery.use('population-sqlite');
+let population = await dbQuery(`
+SELECT
+municipality,
+  ROUND(SUM("2018M09")) AS population2018,
+    ROUND(SUM("2022M09")) AS population2022
+FROM population
+WHERE age >= 18 AND age <= 100
+AND(gender = 'män' OR gender = 'kvinnor')
+GROUP BY municipality;
+`);
+
+tableFromData({
+  data: population.slice(0, 5)
+});
+
 dbQuery.use('unemployed-sqlite');
 
 let unemployed2018And2022 = await dbQuery(`
