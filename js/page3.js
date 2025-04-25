@@ -14,21 +14,27 @@ addMdToPage(`
 `);
 
 dbQuery.use('population-sqlite');
+
 let population2018And2022 = await dbQuery(`
-SELECT
-municipality,
-  ROUND(SUM("2018M09")),
-    ROUND(SUM("2022M09"))
+SELECT municipality, '2018' AS year, SUM("2018M09") AS population
 FROM population
-WHERE age >= 18 AND age <= 100
-AND(gender = 'män' OR gender = 'kvinnor')
+WHERE age >= 18 AND age <= 100 AND (gender = 'män' OR gender = 'kvinnor')
+GROUP BY municipality
+
+UNION ALL
+
+SELECT municipality, '2022' AS year, SUM("2022M09") AS population
+FROM population
+WHERE age >= 18 AND age <= 100 AND (gender = 'män' OR gender = 'kvinnor')
 GROUP BY municipality;
 `);
 
+/*
 tableFromData({
   data: population2018And2022.slice(0, 5),
   columnNames: ['Kommun', 'Folkmängd 2018', 'Folkmängd 2022']
 });
+*/
 
 let population2018 = population2018And2022
   .filter(x => x.year == '2018')
@@ -43,11 +49,10 @@ let totalpopulation = population2018And2022
   .map(x => ({ municipality: x.municipality, population2018: x.population }))
   .map(x => ({ ...x, population2022: population2022.find(y => y.municipality == x.municipality).population }));
 
+
 console.log('2018', population2018)
 console.log('2022', population2022)
 console.log('total', totalpopulation)
-
-
 
 
 dbQuery.use('unemployed-sqlite');
@@ -73,10 +78,11 @@ let unemployed2022 = unemployed2018And2022
 let totalUnemployed = unemployed2018And2022
   .map(x => ({ municipality: x.municipality, unemployed2018: x.unemployed }))
   .map(x => ({ ...x, unemployed2022: unemployed2022.find(y => y.municipality == x.municipality).unemployed }));
-
+/*
 console.log('2018', unemployed2018)
 console.log('2022', unemployed2022)
 console.log('total', totalUnemployed)
+*/
 
 let unemployedForChart;
 let year = addDropdown('År', [2018, 2022, 'Samtliga']);
