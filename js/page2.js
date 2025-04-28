@@ -1,14 +1,22 @@
 addMdToPage(`
-  ## Hypotes Två: 
-  I de kommuner där inkomstökningen varit låg eller negativ har partierna i opposition(S, V, Mp och C) behållit eller ökat sitt stöd.
+  ## Svenska riksdagsvalet och medelinkomsten i låginkomstkommuner under 2018–2022
+  
+  **Hyptoes Två:**
+  *I de kommuner där inkomstökningen varit låg eller negativ har partierna i opposition(S, V, Mp och C) behållit eller ökat sitt stöd.*
 
+  ________
+
+
+  I denna hypotes undersöker vi olika aspekter av medelinkomsten i Sverige under åren 2018 och 2022, samt hur vissa kommuner röstat i de två senaste riksdagsvalen i relation till förändringar i medelinkomstnivån.
+
+  Vi inleder med att presentera en översikt över samtliga svenska kommuners medelinkomst, rangordnade från högst till lägst. Diagrammet visar alla 290 kommuner, men på grund av utrymmesskäl är det interaktivt för att enklare hitta den kommun man söker. I diagrammet framträder en relativt jämn nivå bland kommunerna i mitten, men skillnaderna blir tydliga när vi exempelvis jämför Danderyd och Åsele.
 `);
 
 // läser in data från MongoDB
 dbQuery.use('kommun-info-mongodb');
 
 // skapa en dropdown för att välja år
-let year = addDropdown('År', [2018, 2022, 'Båda']);
+let year = addDropdown('Välj år för att se medelinkomsten i Sverige', [2018, 2022, 'Båda']);
 
 // skapar en variabel som läser in specifikt inkomst per kommun från MongoDB, inkluderar alla kön
 let kommuner18 = await dbQuery.collection('incomeByKommun')
@@ -58,7 +66,7 @@ let meanIncomesTotalt = kommuner
 // sorterar objekten i meanIncomesTotalt i fallande ordning efter medelInkomst 2022
 meanIncomesTotalt.sort((a, b) => b.medelInkomst2022 - a.medelInkomst2022);
 
-
+// hänger ihop med dropdown för att visa vilket år som ska visas i tabellen.
 let chart1data, title;
 if (year == 2018) {
   chart1data = meanIncomes18;
@@ -80,7 +88,7 @@ drawGoogleChart({
   options: {
     title,
     height: 600,
-    chartArea: { left: 60, bottom: 150, width: '92%' },
+    chartArea: { left: 75, bottom: 150, width: '90%' },
     legend: { position: 'top' }, // flyttar legend till toppen av diagrammet
     vAxis: { title: 'Inkomst (TSEK)' },
     hAxis: {
@@ -91,9 +99,16 @@ drawGoogleChart({
   }
 });
 
-// lägger in en liten break mellan tabeller 
 addMdToPage(`
   <br/>`)
+
+addMdToPage(`
+  Vårt huvudsakliga fokus ligger på de kommuner med lägst inkomster. Vi har därför särskilt granskat de tio kommuner som 2018 hade den lägsta medelinkomsten. Samtliga dessa kommuner har haft en positiv utveckling, med ökningar mellan 11,82 och 15,81 procent fram till 2022.
+`)
+
+addMdToPage(`
+  <br/>`)
+
 
 // nu ska vi läsa in datan igen från MongoDB, men nu vill vi ta reda på vilka 10 kolumner som har lägst medelinkomst 2018 och hur mycket de har ökat i procent till 2022.
 let kommunerChange = await dbQuery.collection('incomeByKommun')
@@ -134,11 +149,15 @@ tableFromData({
   ]
 });
 
-// lägger in en liten break mellan tabeller
+
+addMdToPage(`
+  <br/>`)
+addMdToPage(`
+  Den procentuella förändringen i medelinkomsten visualiseras i grafen nedan.`)
 addMdToPage(`
   <br/>`)
 
-// Visa som stapeldiagram (procentuell förändring)
+// visar upp datan som stapeldiagram (procentuell förändring)
 drawGoogleChart({
   type: 'ColumnChart',
   data: [
@@ -155,7 +174,7 @@ drawGoogleChart({
     },
     vAxis: {
       title: 'Förändring (%)',
-      viewWindow: {
+      viewWindow: { // behövde lägga in detta för att få rätt skala på y-axeln
         min: 0,
         max: 20
       }
@@ -164,6 +183,10 @@ drawGoogleChart({
 });
 
 // lägger in en liten break mellan tabeller
+addMdToPage(`
+  <br/>`)
+addMdToPage(`Vi går därefter in på kärnan i hypotesen: hur har dessa kommuner röstat? Här framträder ett tydligt mönster där stödet huvudsakligen ligger hos Socialdemokraterna – med undantag för Perstorp, där Sverigedemokraterna är största parti. Perstorp, som är Skånes minsta kommun, har av Dagens Nyheter beskrivits som en "döende bruksort" med hög arbetslöshet.
+`)
 addMdToPage(`
   <br/>`)
 
@@ -212,6 +235,9 @@ tableFromData({
 // lägger in en liten break mellan tabeller
 addMdToPage(`
   <br/>`)
+addMdToPage(`Mellan 2018 och 2022 förlorar de tidigare ledande partierna viss väljarandel i dessa kommuner, med undantag för Sverigedemokraterna i Perstorp som istället stärker sitt stöd. Detta illustreras tydligare i nästa graf.`)
+addMdToPage(`
+  <br/>`)
 
 // vi skapar en ny variabel där vi mappar efter de partier som fått flest röster i de kommuner som är i fokus. 
 let combinedTopParties = [
@@ -239,36 +265,46 @@ drawGoogleChart({
     },
     colors: ['#1f77b4', '#ff7f0e'],
     legend: { position: 'top' },
-    bar: { groupWidth: '75%' },
-    //isStacked: false
+    //bar: { groupWidth: '75%' },
   }
 });
 
 // lägger in en liten break mellan tabeller
 addMdToPage(`
   <br/>`)
+addMdToPage(`Avslutningsvis visualiserar vi hur stödet för de två politiska blocken – Oppositionen och Regeringsunderlaget – har förändrats i de utvalda kommunerna. För tydlighetens skull definierar vi här blocken som:
+
+* **Regeringsunderlag:** Moderaterna, Kristdemokraterna, Liberalerna, Sverigedemokraterna
+
+* **Opposition:** Arbetarepartiet-Socialdemokraterna, Vänsterpartiet, Miljöpartiet, Centerpartiet
+
+I diagrammet framgår att samtliga kommuner, trots att Socialdemokraterna tappat i stöd, ändå totalt sett ökat sitt stöd för oppositionen mellan de två riksdagsvalen.
+`)
 
 // nu ska vi hämta ut partiernas röster i de kommuner vi har valt att fokusera på men hjälp av en cypher query. 
 let rawResultsGrouped = await dbQuery(`
   MATCH (n:Partiresultat)
   WHERE n.kommun IN ['Filipstad', 'Ljusnarsberg', 'Hultsfred', 'Perstorp', 'Hällefors', 'Högsby', 'Åsele', 'Bjurholm', 'Lessebo', 'Gullspång']
-  AND n.parti IN ['Moderaterna', 'Kristdemokraterna', 'Liberalerna', 'Sverigedemokraterna',
+  AND n.parti IN ['Moderaterna', 'Kristdemokraterna', 'Liberalerna ', 'Sverigedemokraterna',
                   'Arbetarepartiet-Socialdemokraterna', 'Vänsterpartiet', 'Miljöpartiet', 'Centerpartiet']
   RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
 `);
 
-// nedan skapar vi en ny variabel som grupperar partierna i två olika grupper: Regeringsunderlag och Opposition. 
+// nedan skapar vi en ny variabel som grupperar partierna i två olika grupper: Regeringsunderlag och Opposition, för att det senare ska vara lättare att visualisera i ett stapeldiagram. 
 let grupper = {
-  'Regeringsunderlag': ['Moderaterna', 'Kristdemokraterna', 'Liberalerna', 'Sverigedemokraterna'],
+  'Regeringsunderlag': ['Moderaterna', 'Kristdemokraterna', 'Liberalerna ', 'Sverigedemokraterna'],
   'Opposition': ['Arbetarepartiet-Socialdemokraterna', 'Vänsterpartiet', 'Miljöpartiet', 'Centerpartiet']
 };
 
+// vi skapar en ny variabel som ska gruppera kommunerna, tar bort dubbletter och skapar en lista med unika kommuner.
 let kommunerGrouped = [...new Set(rawResultsGrouped.map(x => x.Kommun))];
 
+// Skapar en start-array (chartData) som ser ut som en tabell. Den första raden är rubriker(kolumnnamn) som beskriver: kommunnamn. Röster för oppositionen 2018 och 2022. Röster för regeringssidan 2018 och 2022. Resultat: chartData är redo att fyllas på med siffror för varje kommun.
 let chartData = [
   ['Kommun', 'Opposition 2018', 'Opposition 2022', 'Regeringsunderlag 2018', 'Regeringsunderlag 2022']
 ];
 
+// För varje kommun räknas rösterna ihop, sorterat på opposition / regering och år, och sparas i en tabell(chartData) som kan användas t.ex.för att rita diagram.
 for (let kommun of kommunerGrouped) {
   let kommunData = rawResultsGrouped.filter(x => x.Kommun === kommun);
 
@@ -283,24 +319,37 @@ for (let kommun of kommunerGrouped) {
       reg2022 += row.Röster_2022 || 0;
     }
   }
-
   chartData.push([kommun, reg2018, reg2022, opp2018, opp2022]);
 }
 
+// tillslut kan vi visualisera datan igen i ett stapeldiagram, nu med passande färger för att visa upp höger och vänster sida i politiken. 
 drawGoogleChart({
   type: 'ColumnChart',
   data: chartData,
   options: {
     title: 'Röster per block i top 10 kommuner med minst medelinkomst (2018 vs 2022)',
     height: 550,
-    //isStacked: false,
     legend: { position: 'top' },
     chartArea: { left: 90, bottom: 100, width: '90%' },
     hAxis: {
       title: 'Kommun',
     },
     vAxis: { title: 'Antal röster' },
-    // bar: { groupWidth: '75%' },
     colors: ['#e53935', '#ef5350', '#1e88e5', '#42a5f5',] // blå & röd skala
   }
 });
+
+addMdToPage(`
+  <br/>`)
+addMdToPage(`
+  ## Sammanfattat: 
+Medelinkomsten har ökat i alla de undersökta låginkomstkommunerna mellan 2018 och 2022, med en ökning mellan nästan 12–16 %.
+
+Trots ökningen i inkomster, röstade dessa kommuner fortsatt huvudsakligen på Socialdemokraterna, vilket tyder på att inkomstökningen inte ledde till ett större stöd för partier på högerkanten.
+
+Perstorp är ett undantag: där ökade Sverigedemokraternas stöd tydligt, medan de traditionella partierna tappade.
+
+När man jämför den bredare grupperingens stöd ("Oppositionen" vs "Regeringsunderlaget") ser vi att Oppositionen totalt sett stärktes i dessa låginkomstkommuner, även om Socialdemokraterna tappade något i väljarstöd.
+
+## Slutsats:
+I Sveriges låginkomstkommuner ökade medelinkomsten mellan 2018 och 2022, men detta förändrade inte i någon större utsträckning väljarnas stöd för oppositionella partier (vänster-mitten), utan snarare förstärkte deras ställning totalt sett – med Perstorp som ett tydligt undantag där högern (framför allt Sverigedemokraterna) växte.`)
