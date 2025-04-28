@@ -2,66 +2,51 @@ addMdToPage(`
   ## Hypotes Två: 
   I de kommuner där inkomstökningen varit låg eller negativ har partierna i opposition(S, V, Mp och C) behållit eller ökat sitt stöd.
 
-  Vad är medelinkomsten i alla kommuner? 
-
-  I den här hypotesen har vi två aspekter att ha i åtanke: Ska vi jämföra de top 10 kommunerna vars medelinkomst har ökat minst mellan 2018 och 2022 eller hitta den kommuner som tjänar minst och se hur mycket deras medelinkomst har ökat? Samt därefter se om partistödet har ökat för de partier som är i opposition.
-  
-  ### Plan A: 
-
-  Steg 1: Hitta de kommuner där inkomsten har ökat som minst mellan år 2018 och 2022. Håller oss till top 10.
-
-  Steg 2: Jämför med partistödet i dessa kommuner. Har de partier som är i opposition bibehållit sitt stöd?
-
-  Steg 3: Rita ut det i ett stapeldiagram där vi ser hur mycket partierna ökat sitt stöd i dessa kommuner.
-
-
-  ### Plan B:
-
-  Steg 1: Hitta de kommuner som tjänar minst under båda årtalen och se hur mycket deras medelinkomst har ökat. 
-
-  Steg 2: Jämför med partistödet i dessa kommuner. Har de partier som är i opposition bibehållit sitt stöd?
-
-  Steg 3: Rita ut det i ett stapeldiagram där vi ser hur mycket partierna ökat sitt stöd i dessa kommuner.
 `);
 
-// steg 1
-//Vad är medelinkomsten i alla kommuner under 2018 och 2022?
-
+// läser in data från MongoDB
 dbQuery.use('kommun-info-mongodb');
 
+// skapa en dropdown för att välja år
 let year = addDropdown('År', [2018, 2022, 'Båda']);
 
+// skapar en variabel som läser in specifikt inkomst per kommun från MongoDB, inkluderar alla kön
 let kommuner18 = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
 
+// skapar en variabel som mappar kommuner med medelinkomsten 2018
 let meanIncomes18 = kommuner18.map(x => ({
   kommun: x.kommun,
   medelInkomst2018: x.medelInkomst2018
 }));
 
-
+// här filtrerar vi mededelinkomsten för att ta bort null-värden
 meanIncomes18 = meanIncomes18.filter(x => x.medelInkomst2018 != null);
 
+// Sorterar objekten i meanIncomes18 i fallande ordning efter medelInkomst 2018
 meanIncomes18.sort((a, b) => b.medelInkomst2018 - a.medelInkomst2018);
 
-
+// läser in data på nytt från MongoDB för att hämta medelinkomsten 2022, inkluderar alla kön
 let kommuner = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
 
-
+// skapar en variabel som mappar kommuner med medelinkomsten 2022
 let meanIncomes = kommuner.map(x => ({
   kommun: x.kommun,
   medelInkomst2022: x.medelInkomst2022
 }));
 
+// här filtrerar vi mededelinkomsten för att ta bort null-värden
 meanIncomes = meanIncomes.filter(x => x.medelInkomst2022 != null);
 
+// sorterar objekten i meanIncomes2022 i fallande ordning efter medelinkomst 2022
 meanIncomes.sort((a, b) => b.medelInkomst2022 - a.medelInkomst2022);
 
+// skapar en ny variabel som visar upp inkomst per kommun, som sedan ska användas för att visa upp båda årens medelinkomst i en och samma tabell
 let kommunerTotalt = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
-  .toArray();
 
+// en ny lista (meanIncomesTotalt) med endast kommunnamn och medelinkomster för 2018 och 2022, där båda värdena finns. vi sorterar även bort null-värden
 let meanIncomesTotalt = kommuner
   .filter(x => x.medelInkomst2018 != null && x.medelInkomst2022 != null)
   .map(x => ({
@@ -70,7 +55,9 @@ let meanIncomesTotalt = kommuner
     medelInkomst2022: x.medelInkomst2022
   }));
 
+// sorterar objekten i meanIncomesTotalt i fallande ordning efter medelInkomst 2022
 meanIncomesTotalt.sort((a, b) => b.medelInkomst2022 - a.medelInkomst2022);
+
 
 let chart1data, title;
 if (year == 2018) {
@@ -86,129 +73,40 @@ else {
   title = 'Medelinkomst 2018 och 2022 i alla kommuner (TSEK)';
 }
 
-
+// nu kan vi äntligen visa upp all data i en tabell, som visualiseras bäst med hjälp av en kolumn tabell. 
 drawGoogleChart({
   type: 'ColumnChart',
   data: makeChartFriendly(chart1data, 'Kommun', 'Medelinkomst (TSEK)'),
   options: {
     title,
     height: 600,
-    chartArea: { left: 60, bottom: 150, width: '80%' },
+    chartArea: { left: 60, bottom: 150, width: '92%' },
+    legend: { position: 'top' }, // flyttar legend till toppen av diagrammet
     vAxis: { title: 'Inkomst (TSEK)' },
     hAxis: {
+      title: 'Kommun',
       slantedText: true,
       slantedTextAngle: 45
     }
   }
 });
 
-/*
-// tabell ovan 
+// lägger in en liten break mellan tabeller 
 addMdToPage(`
   <br/>`)
 
-
-let kommunerTop10 = await dbQuery.collection('incomeByKommun')
-  .find({ kon: 'totalt' })
-
-let meanIncomesTop10 = kommunerTop10
-  .filter(x => x.medelInkomst2018 != null)
-  .map(x => ({
-    kommun: x.kommun,
-    medelInkomst2018: x.medelInkomst2018
-  }));
-
-meanIncomesTop10.sort((a, b) => a.medelInkomst2018 - b.medelInkomst2018);
-
-let bottom10 = meanIncomesTop10.slice(0, 10);
-
-*/
-/*
-tableFromData({
-  data: bottom10,
-  columnNames: ['Kommun', 'Medelinkomst 2018 (TSEK)']
-});
-
-// tabell ovan
-*/
-/*
-addMdToPage(`
-  <br/>`)
-
-let kommunerTop102022 = await dbQuery.collection('incomeByKommun')
-  .find({ kon: 'totalt' })
-
-let meanIncomesTop102022 = kommunerTop102022
-  .filter(x => x.medelInkomst2018 != null)
-  .map(x => ({
-    kommun: x.kommun,
-    medelInkomst2022: x.medelInkomst2022
-  }));
-
-meanIncomesTop102022.sort((a, b) => a.medelInkomst2022 - b.medelInkomst2022);
-
-let bottom2022 = meanIncomesTop102022.slice(0, 10);
-
-tableFromData({
-  data: bottom2022,
-  columnNames: ['Kommun', 'Medelinkomst 2022 (TSEK)']
-});
-*/
-/* 
-// tabell ovan
-
-addMdToPage(`
-  <br/>`)
-
-let kommunerProcent = await dbQuery.collection('incomeByKommun')
-  .find({ kon: 'totalt' })
-
-// Räkna ut procentuell förändring mellan 2018 och 2022
-let kommunerMedFörändring = kommunerProcent
-  .filter(x => x.medelInkomst2018 != null && x.medelInkomst2022 != null && x.medelInkomst2018 !== 0)
-  .map(x => {
-    let procentFörändring = ((x.medelInkomst2022 - x.medelInkomst2018) / x.medelInkomst2018) * 100;
-    return {
-      kommun: x.kommun,
-      medelInkomst2018: x.medelInkomst2018,
-      medelInkomst2022: x.medelInkomst2022,
-      förändringProcent: parseFloat(procentFörändring.toFixed(2))
-    };
-  });
-
-// Sortera efter minst ökning (eller minskning först)
-kommunerMedFörändring.sort((a, b) => a.förändringProcent - b.förändringProcent);
-
-let bottom10Procent = kommunerMedFörändring.slice(0, 10);
-
-// Visa som tabell
-tableFromData({
-  data: bottom10Procent,
-  columnNames: [
-    'Kommun',
-    'Medelinkomst 2018 (TSEK)',
-    'Medelinkomst 2022 (TSEK)',
-    'Förändring (%)'
-  ]
-});
-*/
-// tabell ovan
-
-addMdToPage(`
-  <br/>`)
-
-// Hämta all data (vi tar bara en gång, inte två gånger)
+// nu ska vi läsa in datan igen från MongoDB, men nu vill vi ta reda på vilka 10 kolumner som har lägst medelinkomst 2018 och hur mycket de har ökat i procent till 2022.
 let kommunerChange = await dbQuery.collection('incomeByKommun')
   .find({ kon: 'totalt' })
 
-// Filtrera bort poster utan inkomstuppgifter
+// vi filtrerar bort null-värden
 let filtrerade = kommunerChange.filter(x =>
   x.medelInkomst2018 != null &&
   x.medelInkomst2022 != null &&
   x.medelInkomst2018 !== 0
 );
 
-// Räkna ut procentuell förändring
+// skapar en ny variabel som ska räknar ut förändringen i procent mellan 2018 och 2022. 
 let kommunerFörändring = filtrerade.map(x => {
   let förändring = ((x.medelInkomst2022 - x.medelInkomst2018) / x.medelInkomst2018) * 100;
   return {
@@ -219,13 +117,13 @@ let kommunerFörändring = filtrerade.map(x => {
   };
 });
 
-// Sortera på 2018 års inkomst för att hitta kommuner med lägst nivå från början
+// sortera på 2018 års inkomst för att hitta kommuner med lägst nivå från början
 kommunerFörändring.sort((a, b) => a.medelInkomst2018 - b.medelInkomst2018);
 
-// Ta ut de 10 kommuner som hade lägst inkomst 2018
+// ta ut de 10 kommuner som hade lägst inkomst 2018
 let bottom10Change = kommunerFörändring.slice(0, 10);
 
-// Visa tabell med både inkomster och procentuell förändring
+// gör en tabell med både inkomster och procentuell förändring, samt de de 10 kommuner vi är mest intresserade av
 tableFromData({
   data: bottom10Change,
   columnNames: [
@@ -236,6 +134,7 @@ tableFromData({
   ]
 });
 
+// lägger in en liten break mellan tabeller
 addMdToPage(`
   <br/>`)
 
@@ -249,31 +148,39 @@ drawGoogleChart({
   options: {
     title: 'Procentuell förändring i medelinkomst (2018–2022) – Kommuner med lägst inkomst 2018',
     height: 500,
-    chartArea: { left: 60, bottom: 120, width: '80%' },
+    chartArea: { left: 60, bottom: 120, width: '90%' },
+    legend: { position: 'top' }, // flyttar legend till toppen av diagrammet
+    hAxis: {
+      title: 'Kommun',
+    },
     vAxis: {
-      title: 'Förändring (%)', viewWindow: {
+      title: 'Förändring (%)',
+      viewWindow: {
         min: 0,
         max: 20
       }
-    },
-    hAxis: { slantedText: true, slantedTextAngle: 45 }
+    }
   }
 });
 
+// lägger in en liten break mellan tabeller
 addMdToPage(`
   <br/>`)
 
+// nu kan vi äntligen börja läsa in data från Neo4j, där vi ska hämta ut partiernas röster i de kommuner vi har valt att fokusera på.
 dbQuery.use('riksdagsval-neo4j');
 
+// här gör vi en cypher query som hämtar ut vad de 10 kommuner vi har valt ut bestämt sig för att rösta på i valet 2018 och 2022.
 let rawResults = await dbQuery(`
   MATCH (n:Partiresultat)
   WHERE n.kommun IN ['Filipstad', 'Ljusnarsberg', 'Hultsfred', 'Perstorp', 'Hällefors', 'Högsby', 'Åsele', 'Bjurholm', 'Lessebo', 'Gullspång']
   RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
 `);
 
-// Grupp per kommun och hitta det parti med flest röster 2018
+// skapar en tom lista för att spara de största partierna i varje kommun.
 let topParties = [];
 
+// grupperar alla rader i rawResults efter kommunnamn. Varje kommun får en lista med sina partier och röstsiffror.
 let grouped = {};
 for (let row of rawResults) {
   let kommun = row.Kommun;
@@ -283,6 +190,7 @@ for (let row of rawResults) {
   grouped[kommun].push(row);
 }
 
+// för varje kommun: Hitta partiet som fick flest röster 2018 och lägg till detta parti(och dess röstsiffror) i topParties.
 for (let kommun in grouped) {
   let top = grouped[kommun].reduce((max, current) => {
     return current.Röster_2018 > max.Röster_2018 ? current : max;
@@ -295,14 +203,17 @@ for (let kommun in grouped) {
   });
 }
 
+// vi visar upp datan som vi sorterat i en tabell, där vi har kommunnamn, parti och röstsiffror för 2018 och 2022.
 tableFromData({
   data: topParties,
   columnNames: ['Kommun', 'Parti', 'Röster 2018', 'Röster 2022']
 });
 
+// lägger in en liten break mellan tabeller
 addMdToPage(`
   <br/>`)
 
+// vi skapar en ny variabel där vi mappar efter de partier som fått flest röster i de kommuner som är i fokus. 
 let combinedTopParties = [
   ...topParties.map(x => ({
     kommun: x.kommun,
@@ -311,6 +222,7 @@ let combinedTopParties = [
   }))
 ];
 
+// nu kan vi visualisera datan med hjälp av ett stapeldiagram, där man kan se skillanderna visuellt mellan 2018 och 2022.
 drawGoogleChart({
   type: 'ColumnChart',
   data: [
@@ -318,84 +230,25 @@ drawGoogleChart({
     ...combinedTopParties.map(x => [x.kommun, x.röster2018, x.röster2022])
   ],
   options: {
-    title: 'Röster på största parti i varje kommun (2018 vs 2022)',
+    title: 'Röster på största parti i top 10 kommuner med minst medelinkomst (2018 vs 2022)',
     height: 500,
-    chartArea: { left: 60, bottom: 120, width: '80%' },
+    chartArea: { left: 90, bottom: 100, width: '90%' },
     vAxis: { title: 'Antal röster' },
     hAxis: {
       title: 'Kommun',
-      slantedText: true,
-      slantedTextAngle: 45
     },
     colors: ['#1f77b4', '#ff7f0e'],
     legend: { position: 'top' },
     bar: { groupWidth: '75%' },
-    isStacked: false
+    //isStacked: false
   }
 });
 
+// lägger in en liten break mellan tabeller
 addMdToPage(`
   <br/>`)
 
-
-/*
-let rawResultsTot = await dbQuery(`
-  MATCH (n:Partiresultat)
-  WHERE n.kommun IN ['Filipstad', 'Ljusnarsberg', 'Hultsfred', 'Perstorp', 'Hällefors', 'Högsby', 'Åsele', 'Bjurholm', 'Lessebo', 'Gullspång']
-  AND n.parti IN ['Sverigedemokraterna', 'Vänsterpartiet', 'Miljöpartiet', 'Centerpartiet', 'Arbetarepartiet-Socialdemokraterna']
-  RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
-`);
-*/
-/*
-tableFromData({
-  data: rawResultsTot,
-  columnNames: ['Kommun', 'Parti', 'Röster 2018', 'Röster 2022']
-});
-*/
-/*
-// Förbered datan
-let chartData = [
-  ['Kommun', 'Sverigedemokraterna 2018', 'Sverigedemokraterna 2022',
-    'Vänsterpartiet 2018', 'Vänsterpartiet 2022',
-    'Miljöpartiet 2018', 'Miljöpartiet 2022',
-    'Centerpartiet 2018', 'Centerpartiet 2022',
-    'Socialdemokraterna 2018', 'Socialdemokraterna 2022']
-];
-
-let kommunerParti = [...new Set(rawResultsTot.map(x => x.Kommun))];
-let partier = [
-  'Sverigedemokraterna',
-  'Vänsterpartiet',
-  'Miljöpartiet',
-  'Centerpartiet',
-  'Arbetarepartiet-Socialdemokraterna'
-];
-
-for (let kommun of kommunerParti) {
-  let row = [kommun];
-  for (let parti of partier) {
-    let result = rawResultsTot.find(x => x.Kommun === kommun && x.Parti === parti);
-    row.push(result?.Röster_2018 || 0);
-    row.push(result?.Röster_2022 || 0);
-  }
-  chartData.push(row);
-}
-
-drawGoogleChart({
-  type: 'ColumnChart',
-  data: chartData,
-  options: {
-    title: 'Riksdagsröster per parti och kommun (2018 vs 2022)',
-    height: 600,
-    isStacked: false,
-    chartArea: { left: 60, bottom: 150, right: 30, top: 50 },
-    hAxis: { slantedText: true, slantedTextAngle: 45 },
-    vAxis: { title: 'Antal röster' },
-    bar: { groupWidth: '75%' }
-  }
-});
-*/
-
+// nu ska vi hämta ut partiernas röster i de kommuner vi har valt att fokusera på men hjälp av en cypher query. 
 let rawResultsGrouped = await dbQuery(`
   MATCH (n:Partiresultat)
   WHERE n.kommun IN ['Filipstad', 'Ljusnarsberg', 'Hultsfred', 'Perstorp', 'Hällefors', 'Högsby', 'Åsele', 'Bjurholm', 'Lessebo', 'Gullspång']
@@ -404,6 +257,7 @@ let rawResultsGrouped = await dbQuery(`
   RETURN n.kommun AS Kommun, n.parti AS Parti, n.roster2018 AS Röster_2018, n.roster2022 AS Röster_2022
 `);
 
+// nedan skapar vi en ny variabel som grupperar partierna i två olika grupper: Regeringsunderlag och Opposition. 
 let grupper = {
   'Regeringsunderlag': ['Moderaterna', 'Kristdemokraterna', 'Liberalerna', 'Sverigedemokraterna'],
   'Opposition': ['Arbetarepartiet-Socialdemokraterna', 'Vänsterpartiet', 'Miljöpartiet', 'Centerpartiet']
@@ -437,13 +291,16 @@ drawGoogleChart({
   type: 'ColumnChart',
   data: chartData,
   options: {
-    title: 'Röster per block i kommuner (2018 vs 2022)',
-    height: 600,
-    isStacked: false,
-    chartArea: { left: 100, bottom: 150, right: 10, top: 50 },
-    hAxis: { slantedText: true, slantedTextAngle: 45 },
+    title: 'Röster per block i top 10 kommuner med minst medelinkomst (2018 vs 2022)',
+    height: 550,
+    //isStacked: false,
+    legend: { position: 'top' },
+    chartArea: { left: 90, bottom: 100, width: '90%' },
+    hAxis: {
+      title: 'Kommun',
+    },
     vAxis: { title: 'Antal röster' },
-    bar: { groupWidth: '75%' },
+    // bar: { groupWidth: '75%' },
     colors: ['#e53935', '#ef5350', '#1e88e5', '#42a5f5',] // blå & röd skala
   }
 });
