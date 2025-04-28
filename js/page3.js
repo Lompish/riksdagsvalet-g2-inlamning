@@ -88,23 +88,20 @@ let combinedTurnout = electionTurnout2018.map(turnout2018 => {
     turnout2022: turnout2022 ? turnout2022.turnout : null
   };
 });
+*/
 
 
 let turnoutForChart;
-let turnoutYear = addDropdown('År', [2018, 2022]);
+let turnoutYear = addDropdown('År', [2018, 2022, 'Samtliga']);
 if (turnoutYear == 2018) {
-  turnoutForChart = electionTurnout2018;
+  turnoutForChart = turnout2018;
 }
 else if (turnoutYear == 2022) {
-  turnoutForChart = electionTurnout2022;
+  turnoutForChart = turnout2022;
 }
 else if (turnoutYear == 'Samtliga') {
   turnoutForChart = combinedTurnout;
 }
-
-console.log('electionTurnout2022', electionTurnout2022[0]);
-console.log('combined turnout', combinedTurnout[0]);
-
 
 drawGoogleChart({
   type: 'BarChart',
