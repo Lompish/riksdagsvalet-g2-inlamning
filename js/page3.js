@@ -13,6 +13,114 @@ addMdToPage(`
 
 `);
 
+dbQuery.use('eligibleVotersAge-sqlite');
+
+let turnout2018 = await dbQuery(`
+SELECT 
+  municipality, 
+  votersPercent2018 AS 'turnout2018'
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar'
+GROUP BY municipality
+`);
+
+let turnout2022 = await dbQuery(`
+SELECT 
+  municipality, 
+  votersPercent2022 AS 'turnout2022'
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar'
+GROUP BY municipality
+`);
+
+let combinedTurnout = await dbQuery(`
+SELECT 
+  municipality, 
+  votersPercent2018 AS turnout2018, 
+  votersPercent2022 AS turnout2022
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar'
+GROUP BY municipality
+ORDER BY municipality;
+`);
+
+tableFromData({
+  data: turnout2018.slice(0, 5),
+  columnNames: ['Kommun', 'Valdeltagande i procent 2018']
+});
+
+tableFromData({
+  data: turnout2018.slice(0, 5),
+  columnNames: ['Kommun', 'Valdeltagande i procent 2022']
+});
+
+
+console.log('Enkel lösning18', turnout2018[0])
+console.log('Enkel lösning22', turnout2022[0])
+console.log('Rooogntudju', combinedTurnout[0])
+
+/*
+
+let electionTurnout2018 = votersPercent2018And2022
+  .filter(x => x.year == '2018')
+  .map(({ municipality, year, turnout }) => ({
+    municipality,
+    year,
+    turnout
+  }));
+
+let electionTurnout2022 = votersPercent2018And2022
+  .filter(x => x.year == '2022')
+  .map(({ municipality, year, turnout }) => ({
+    municipality,
+    year,
+    turnout
+  }));
+
+let combinedTurnout = electionTurnout2018.map(turnout2018 => {
+  let turnout2022 = electionTurnout2022.find(turnout =>
+    turnout.municipality == turnout2018.municipality && turnout.year == '2022'
+  );
+
+  return {
+    municipality: turnout2018.municipality,
+    turnout2018: turnout2018.turnout,
+    turnout2022: turnout2022 ? turnout2022.turnout : null
+  };
+});
+
+
+let turnoutForChart;
+let turnoutYear = addDropdown('År', [2018, 2022]);
+if (turnoutYear == 2018) {
+  turnoutForChart = electionTurnout2018;
+}
+else if (turnoutYear == 2022) {
+  turnoutForChart = electionTurnout2022;
+}
+else if (turnoutYear == 'Samtliga') {
+  turnoutForChart = combinedTurnout;
+}
+
+console.log('electionTurnout2022', electionTurnout2022[0]);
+console.log('combined turnout', combinedTurnout[0]);
+
+
+drawGoogleChart({
+  type: 'BarChart',
+  data: makeChartFriendly(turnoutForChart),
+  options: {
+    title: 'Valdeltagande per kommun ' + turnoutYear,
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    }
+  }
+});
+
+
 dbQuery.use('population-sqlite');
 
 let population2018And2022 = await dbQuery(`
@@ -25,7 +133,7 @@ WHERE age >= 18 AND age <= 100
   AND municipality = 'Stockholm'
 GROUP BY municipality
 
-UNION ALL
+UNION
 
 SELECT 
   municipality, 
@@ -50,79 +158,12 @@ let population2022 = population2018And2022
   .filter(x => x.year == '2022')
   .map(({ municipality, population }) => ({ municipality, population }));
 
-
 let populationBothYears = population2018And2022
   .map(x => ({ municipality: x.municipality, population2018: x.population }))
   .map(x => ({ ...x, population2022: population2022.find(y => y.municipality == x.municipality).population }));
 
-//let populationForChart;
+let populationForChart;
 
-dbQuery.use('eligibleVotersAge-sqlite');
-
-let votersPercent2018And2022 = await dbQuery(`
-SELECT 
-  municipality, 
-  votersPercent2018,
-  '2018' AS year
-FROM eligibleVotersAge
-WHERE age = 'samtliga åldrar'
-GROUP BY municipality
-
-UNION
-
-SELECT 
-  municipality, 
-  votersPercent2022,
-  '2022' AS year
-FROM eligibleVotersAge
-WHERE age = 'samtliga åldrar'
-GROUP BY municipality
-`);
-
-console.log('votersPercent2018And2022', votersPercent2018And2022)
-
-tableFromData({
-  data: votersPercent2018And2022.slice(0, 5),
-  columnNames: ['Kommun', 'Valdeltagande i procent', 'År']
-});
-
-
-let electionTurnout2018 = votersPercent2018And2022
-  .filter(x => x.year == '2018')
-  .map(({ municipality, votersPercent2018And2022 }) => ({ municipality, votersPercent2018And2022 }));
-
-
-
-let electionTurnout2022 = votersPercent2018And2022
-  .filter(x => x.year == '2022')
-  .map(({ municipality, votersPercent2022 }) => ({ municipality, votersPercent2022 }));
-
-
-console.log('electionTurnout2018', electionTurnout2018)
-
-console.log('electionTurnout2022', electionTurnout2022)
-
-/*
-
-let electionTurnout2018And2022 = votersPercent2018And2022
-  .map(x => ({ municipality: x.municipality, votersPercent2018: x.votersPercent2018 }))
-  .map(x => ({ ...x, votersPercent2018And2022: votersPercent2022.find(y => y.municipality == x.municipality).votersPercent2018And2022 }));
-
- 
-
-console.log('electionTurnout2018', electionTurnout2018)
-console.log('electionTurnout2022', electionTurnout2022)
-console.log('electionTurnout2018And2022', electionTurnoutBoth)
-
-
-
-
-
-
-
-
-
-/*
 let populationYear = addDropdown('År', [2018, 2022, 'Samtliga']);
 if (populationYear == 2018) {
   populationForChart = population2018;
@@ -133,8 +174,6 @@ else if (populationYear == 2022) {
 else if (populationYear == 'Samtliga') {
   populationForChart = populationBothYears;
 }
-
-/*
 
 drawGoogleChart({
   type: 'ColumnChart',
@@ -151,11 +190,9 @@ drawGoogleChart({
 });
 
 
-console.log('2018', population2018)
-console.log('2022', population2022)
-console.log('total', totalpopulation)
-
-
+//console.log('2018', population2018)
+console.log('2022', population2022[0])
+console.log('total', populationBothYears[0])
 
 
 dbQuery.use('unemployed-sqlite');
@@ -270,6 +307,7 @@ tableFromData({
 
 let totalEligibleVotersMunicipality2018And2022 = totalEligibleVotersMunicipality2018.map(
   (x, i) => ({ ...x, eligibleVoters2022: totalEligibleVotersMunicipality2022[i].eligibleVoters2022 }));
+
 console.log('totalEligibleVotersMunicipality2018And2022', totalEligibleVotersMunicipality2018And2022);
 
 
