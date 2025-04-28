@@ -55,8 +55,74 @@ let populationBothYears = population2018And2022
   .map(x => ({ municipality: x.municipality, population2018: x.population }))
   .map(x => ({ ...x, population2022: population2022.find(y => y.municipality == x.municipality).population }));
 
-let populationForChart;
+//let populationForChart;
 
+dbQuery.use('eligibleVotersAge-sqlite');
+
+let votersPercent2018And2022 = await dbQuery(`
+SELECT 
+  municipality, 
+  votersPercent2018,
+  '2018' AS year
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar'
+GROUP BY municipality
+
+UNION
+
+SELECT 
+  municipality, 
+  votersPercent2022,
+  '2022' AS year
+FROM eligibleVotersAge
+WHERE age = 'samtliga åldrar'
+GROUP BY municipality
+`);
+
+console.log('votersPercent2018And2022', votersPercent2018And2022)
+
+tableFromData({
+  data: votersPercent2018And2022.slice(0, 5),
+  columnNames: ['Kommun', 'Valdeltagande i procent', 'År']
+});
+
+
+let electionTurnout2018 = votersPercent2018And2022
+  .filter(x => x.year == '2018')
+  .map(({ municipality, votersPercent2018And2022 }) => ({ municipality, votersPercent2018And2022 }));
+
+
+
+let electionTurnout2022 = votersPercent2018And2022
+  .filter(x => x.year == '2022')
+  .map(({ municipality, votersPercent2022 }) => ({ municipality, votersPercent2022 }));
+
+
+console.log('electionTurnout2018', electionTurnout2018)
+
+console.log('electionTurnout2022', electionTurnout2022)
+
+/*
+
+let electionTurnout2018And2022 = votersPercent2018And2022
+  .map(x => ({ municipality: x.municipality, votersPercent2018: x.votersPercent2018 }))
+  .map(x => ({ ...x, votersPercent2018And2022: votersPercent2022.find(y => y.municipality == x.municipality).votersPercent2018And2022 }));
+
+ 
+
+console.log('electionTurnout2018', electionTurnout2018)
+console.log('electionTurnout2022', electionTurnout2022)
+console.log('electionTurnout2018And2022', electionTurnoutBoth)
+
+
+
+
+
+
+
+
+
+/*
 let populationYear = addDropdown('År', [2018, 2022, 'Samtliga']);
 if (populationYear == 2018) {
   populationForChart = population2018;
@@ -68,6 +134,7 @@ else if (populationYear == 'Samtliga') {
   populationForChart = populationBothYears;
 }
 
+/*
 
 drawGoogleChart({
   type: 'ColumnChart',
@@ -84,7 +151,6 @@ drawGoogleChart({
 });
 
 
-/*
 console.log('2018', population2018)
 console.log('2022', population2022)
 console.log('total', totalpopulation)
