@@ -19,15 +19,7 @@ Vi tror oss kunna hitta ett ganska starkt samband mellan arbetslöshet och valde
 
 **Låt oss undersöka:**
 
-När vi tittar på datan finner vi att valdeltagandet i Sverige är högt. 
-
-Den lägsta siffran i vårt dataset är från valet 2022, där Södertälje tar jumboplatsen med sina 71 procent. De hade då också en av landets högsta arbetslöshetssiffror på 7,25 procent.
-
-Det högsta valdeltagandet har Danderyd, som 2018 kom upp i hela 94 procents valdeltagande. De har också en av landets lägsta nivåer av arbetslöshet.
-
-**2022**: **Lessebo** (hög arbetslöshet) har ett **6 procentenheter högre valdeltagande** än **Pajala** (låg arbetslöshet).
-
-
+När vi tittar på datan finner vi att valdeltagandet i Sverige är högt: 
 
 `);
 
@@ -126,6 +118,7 @@ inPercent2022.sort((a, b) => a.unemployedPercent > b.unemployedPercent ? 1 : -1)
 
 let unemployment2018 = inPercent2018.map(x => x.unemployedPercent)
 
+
 let topTenLowest2018 = inPercent2018.slice(0, 10)
 let lowUnemployment2018 = inPercent2018.slice(0, 96)
 let mediumUnemployment2018 = inPercent2018.slice(96, 192)
@@ -168,10 +161,163 @@ let unemploymentGroupsByYear = {
   ]
 };
 
-let selectedYear = addDropdown('År', [2018, 2022]);
+let unemploymentAndTurnoutByYear = {
+  2018: inPercent2018
+    .map(({ municipality, unemployedPercent, turnout }) => ({
+      municipality,
+      unemployedPercent,
+      turnout
+    })),
+  2022: inPercent2022
+    .map(({ municipality, unemployedPercent, turnout }) => ({
+      municipality,
+      unemployedPercent,
+      turnout
+    }))
+};
+
+
+let selectedYearForFullChart = addDropdown('Valår', [2018, 2022]);
+
+let dataForYear = unemploymentAndTurnoutByYear[selectedYearForFullChart];
+
+let chartReadyData = makeChartFriendly(dataForYear);
+chartReadyData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: chartReadyData,
+  options: {
+    title: `Arbetslöshet och valdeltagande samtliga kommuner ${selectedYearForFullChart}.`,
+    legend: { position: 'right' },
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    vAxis: {
+      title: 'Valdeltagande (procent)',
+      minValue: 0
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+addMdToPage(`
+  <br>
+  
+**Den lägsta siffran i vårt dataset är från valet 2022**, där *Södertälje* tar jumboplatsen med sina 71 procent. De hade då också en av landets högsta arbetslöshetssiffror på 7,25 procent.
+
+Det högsta valdeltagandet har *Danderyd*, som 2018 kom upp i hela 94 procents valdeltagande. De har också en av landets lägsta nivåer av arbetslöshet.
+
+Detta ser ut att vara en tydlig skillnad!
+`);
+
+let municipalityChartYear = addDropdown('År för vald kommun', [2018, 2022]);
+let fullYearData = unemploymentAndTurnoutByYear[municipalityChartYear]; // updated for dropdown
+
+let municipalityList = [...new Set(fullYearData.map(item => item.municipality.trim()))];
+municipalityList = municipalityList.filter(m => m !== 'Södertälje').sort((a, b) => a.localeCompare(b));
+municipalityList.unshift('Södertälje');
+
+let selectedMunicipality = addDropdown('Kommun', municipalityList);
+
+let selectedMunicipalityData = fullYearData.filter(item => item.municipality === selectedMunicipality);
+
+let formattedMunicipalityData = makeChartFriendly(selectedMunicipalityData);
+formattedMunicipalityData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: formattedMunicipalityData,
+  options: {
+    title: `Arbetslöshet och valdeltagande i ${selectedMunicipality}, år ${municipalityChartYear} (i procent).`,
+    legend: {
+      position: 'right',
+      alignment: 'start',
+      maxLines: 6
+    },
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    vAxis: {
+      minValue: 0
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+
+
+let comparisonYear = municipalityChartYear;
+let fullDataForYear = unemploymentAndTurnoutByYear[comparisonYear];
+
+let comparisonData = fullDataForYear.filter(item =>
+  item.municipality === 'Södertälje' || item.municipality === 'Danderyd'
+);
+
+let formattedComparisonData = makeChartFriendly(comparisonData);
+formattedComparisonData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: formattedComparisonData,
+  options: {
+    title: `Arbetslöshet och valdeltagande: Södertälje vs Danderyd (${comparisonYear})`,
+    legend: {
+      position: 'right',
+      alignment: 'start'
+    },
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    vAxis: {
+      minValue: 0,
+      title: 'Procent'
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+let fullUnemploymentDataForYear = {
+  2018: inPercent2018.map(x => ({
+    municipality: x.municipality,
+    year: x.year,
+    unemployedPercent: x.unemployedPercent,
+    turnout: x.turnout
+  })),
+  2022: inPercent2022.map(x => ({
+    municipality: x.municipality,
+    year: x.year,
+    unemployedPercent: x.unemployedPercent,
+    turnout: x.turnout
+  }))
+};
+
+addMdToPage(`
+  <br>
+
+  **Men, om vi ser efter** så blir det tydligt att variationerna är små. Med några få undantag rör sig valdeltagandet förhållandevis stadigt nånstans mellan 80-85 procent, även när vi filtrerar på de kommuner som har lägst eller högst arbetslöshet.
+
+  Våra vänner i Danderyd och Södertälje till trots.
+  
+  `);
+
+let selectedYear = addDropdown('År', [2022, 2018]);
 let selectedGroups = unemploymentGroupsByYear[selectedYear];
-let selectedLevelLabel = addDropdown('Arbetslöshet på kommunnivå', selectedGroups.map(g => g.label));
-let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
+let selectedLevelLabel = addDropdown('Arbetslöshet på kommunnivå', selectedGroups.map(g => g.label), 'Medelmåttig');
+
+let selectedGroup = selectedGroups
+  .find(g => g.label === selectedLevelLabel);
+
 let unemploymentLevelChart = selectedGroup.data;
 
 let chartData = makeChartFriendly(unemploymentLevelChart);
@@ -198,38 +344,6 @@ drawGoogleChart({
   }
 });
 
-let municipalityList = [...new Set(unemploymentLevelChart.map(item => item.municipality))]
-
-let selectedMunicipality = addDropdown('Enskilda kommuner (för ovan valda år)', municipalityList.sort((a, b) => a.localeCompare(b)));
-
-let selectedMunicipalityData = unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
-
-let formattedMunicipalityData = makeChartFriendly(selectedMunicipalityData);
-
-formattedMunicipalityData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
-
-
-drawGoogleChart({
-  type: 'ColumnChart',
-  data: formattedMunicipalityData,
-  options: {
-    title: `Arbetslöshet och valdeltagande i ${selectedMunicipality}, år ${selectedYear} (i procent).`,
-    legend: {
-      position: 'right',
-      alignment: 'start',
-      maxLines: 6
-    },
-    height: 400,
-    chartArea: { left: 80 },
-    hAxis: {
-      slantedText: true,
-      slantedAngle: 45
-    },
-    colors: ['green', 'orange']
-  }
-});
-
-
 let highestLowestByYear = {
   2018: [
     { label: 'Högst arbetslöshet', data: topTenHighest2018 },
@@ -241,6 +355,15 @@ let highestLowestByYear = {
 
   ]
 };
+
+addMdToPage(`
+  <br>
+
+  **Låt oss jämföra ** så blir det tydligt att variationerna är små. Med några få undantag rör sig valdeltagandet förhållandevis stadigt nånstans mellan 80-85 procent, även när vi filtrerar på de kommuner som har lägst eller högst arbetslöshet.
+
+  Våra vänner i *Danderyd* och *Södertälje* till trots.
+  
+  `);
 
 let selectedYear2 = addDropdown('År', [2018, 2022]);
 
@@ -268,3 +391,12 @@ drawGoogleChart({
     colors: ['green', 'orange']
   }
 });
+
+addMdToPage(`
+  <br>
+
+  **Men, om vi ser efter** så blir det tydligt att variationerna är små. Med några få undantag rör sig valdeltagandet förhållandevis stadigt nånstans mellan 80-85 procent, även när vi filtrerar på de kommuner som har lägst eller högst arbetslöshet.
+
+  Våra vänner i *Danderyd* och *Södertälje* till trots.
+  
+  `);
