@@ -106,8 +106,6 @@ WHERE age BETWEEN 18 AND 100
 GROUP BY municipality;
 `);
 
-console.log('population', population2018And2022[0])
-
 let inPercent = unemployed2018And2022
   .map(x => ({
     ...x, population: population2018And2022
@@ -125,12 +123,8 @@ inPercent2018.sort((a, b) => a.unemployedPercent > b.unemployedPercent ? 1 : -1)
 console.log('inPercent2018', inPercent2018);
 
 inPercent2022.sort((a, b) => a.unemployedPercent > b.unemployedPercent ? 1 : -1)
-console.log('inPercent2022', inPercent2022);
 
 let unemployment2018 = inPercent2018.map(x => x.unemployedPercent)
-console.log(s.min(unemployment2018))
-console.log(s.max(unemployment2018))
-console.log(inPercent2018.length)
 
 let lowUnemployment2018 = inPercent2018.slice(0, 96)
 let mediumUnemployment2018 = inPercent2018.slice(96, 192)
@@ -158,32 +152,69 @@ let unemplymentGroups2022 = [
 
 let unemploymentGroupsByYear = {
   2018: [
-    { label: 'Låg', data: lowUnemployment2018 },
-    { label: 'Medel', data: mediumUnemployment2018 },
-    { label: 'Hög', data: highUnemployment2018 }
+    { label: 'Låg arbetslöshetsnivå', data: lowUnemployment2018 },
+    { label: 'Medel arbetslöshetsnivå', data: mediumUnemployment2018 },
+    { label: 'Hög arbetslöshetsnivå', data: highUnemployment2018 }
   ],
   2022: [
-    { label: 'Låg', data: lowUnemployment2022 },
-    { label: 'Medel', data: mediumUnemployment2022 },
-    { label: 'Hög', data: highUnemployment2022 }
+    { label: 'Låg arbetslöshetsnivå', data: lowUnemployment2022 },
+    { label: 'Medel arbetslöshetsnivå', data: mediumUnemployment2022 },
+    { label: 'Hög arbetslöshetsnivå', data: highUnemployment2022 }
   ]
 };
+////Existing: Select year and unemployment group
+let selectedYear = addDropdown('År', [2018, 2022]);
+let selectedGroups = unemploymentGroupsByYear[selectedYear];
+let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
+let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
+let unemploymentLevelChart = selectedGroup.data;
+
+// 👇 NEW: Add dropdown for municipality
+let municipalityNames = unemploymentLevelChart.map(item => item.municipality); // note: it's `municipality`, not `kommun`
+let selectedMunicipality = addDropdown('Kommun', ['Alla', ...municipalityNames]); // Add 'Alla' as default
+
+// 👇 Filter chart data based on municipality selection
+let chartData = selectedMunicipality === 'Alla'
+  ? unemploymentLevelChart
+  : unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
+
+// Draw the chart
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: makeChartFriendly(chartData),
+  options: {
+    title: `Arbetslöshet och valdeltagande per kommun (${selectedYear}) – ${selectedLevelLabel}${selectedMunicipality !== 'Alla' ? ', ' + selectedMunicipality : ''}`,
+    legend: '',
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['#3366cc', '#dc3912']
+  }
+});
+//////
+
+/*
 
 let selectedYear = addDropdown('År', [2018, 2022]);
 
 let selectedGroups = unemploymentGroupsByYear[selectedYear];
 
-let selectedLevelLabel = addDropdown('Arbetslöshetsgrad', selectedGroups.map(g => g.label));
+let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
 
 let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
 
 let unemploymentLevelChart = selectedGroup.data;
 
+
 drawGoogleChart({
   type: 'ColumnChart',
   data: makeChartFriendly(unemploymentLevelChart),
   options: {
-    title: 'nånting',
+    title: `Arbetslöshet och valdeltagande per kommun (${selectedYear}), (${selectedLevelLabel}).`,
+    legend: '',
     height: 500,
     chartArea: { left: 80 },
     hAxis: {
@@ -195,8 +226,24 @@ drawGoogleChart({
 
 
 
+
+
 /////////
+
+
+
+
 /*
+// Extract available municipalities from current dataset
+let municipalityNames = unemploymentLevelChart.map(item => item.kommun);
+
+// Add a dropdown for selecting a single municipality
+let selectedMunicipality = addDropdown('Kommun', municipalityNames);
+
+let selectedData = unemploymentLevelChart.find(item => item.kommun === selectedMunicipality);
+
+console.log('unemploymentLevelChart', unemploymentLevelChart[0])
+
 drawGoogleChart({
   type: 'ColumnChart',
   data: makeChartFriendly(unemploymentLevelChart),
