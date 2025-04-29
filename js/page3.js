@@ -144,32 +144,66 @@ console.log(lowUnemployment2018)
 console.log(mediumUnemployment2018)
 console.log(highUnemployment2018)
 
-let unemploymentLevelChart;
+let unemploymentGroups = [
+  { label: 'lowUnemployment2018', data: lowUnemployment2018 },
+  { label: 'mediumUnemployment2018', data: mediumUnemployment2018 },
+  { label: 'highUnemployment2018', data: highUnemployment2018 },
+  { label: 'lowUnemployment2022', data: lowUnemployment2022 },
+  { label: 'mediumUnemployment2022', data: mediumUnemployment2022 },
+  { label: 'highUnemployment2022', data: highUnemployment2022 }
+]
 
-let button = addDropdown('Arbetslöshetsgrad', ['Låg', 'Medel', 'Hög']);
-if (button == 'Låg') {
-  unemploymentLevelChart = lowUnemployment2018;
-}
-else if (button == 'Medel') {
-  unemploymentLevelChart = mediumUnemployment2018;
-}
-else if (button == 'Hög') {
-  unemploymentLevelChart = highUnemployment2018;
-}
+// User interface for choosing a group and filter out outliers
+export function chooseGroupPlusOutlierFiltering(dropdownLabel, groups, chosen1, chosen2) {
+  // Dropdowns for choice of group + filtering of outliers
+  let chosenGroupLabel = addDropdown(dropdownLabel, groups.map(x => x.label), chosen1);
+  let filterOutliers = addDropdown('Extremvärden', [
+    'Ja, ingen filtrering', 'Nej, ta bort mer än ± 3 x standardavvikelse',
+    'Nej, ta bort lägsta och högsta 5% percentiler', 'Nej, ta bort lägsta och högsta 10% percentiler'], chosen2);
 
-drawGoogleChart({
-  type: 'ColumnChart',
-  data: makeChartFriendly(unemploymentLevelChart),
-  options: {
-    title: 'nånting',
-    height: 500,
-    chartArea: { left: 80 },
-    hAxis: {
-      slantedText: true,
-      slantedAngle: 45
-    }
+  let year = addDropdown('År', [2018, 2022]);
+  if (year == 2018) {
+    unemployedForChart = unemploymentSections;
   }
-});
+  else if (year == 2022) {
+    unemployedForChart = unemploymentSections;
+  }
+
+  let unemploymentSections = addDropdown('Arbetslöshetsgrad', ['Låg', 'Medel', 'Hög']);
+  if (button == 'Låg') {
+    unemploymentLevelChart = lowUnemployment2018;
+  }
+  else if (button == 'Medel') {
+    unemploymentLevelChart = mediumUnemployment2018;
+  }
+  else if (button == 'Hög') {
+    unemploymentLevelChart = highUnemployment2018;
+  }
+
+  let unemploymentSections2022 = addDropdown('Arbetslöshetsgrad', ['Låg', 'Medel', 'Hög']);
+  if (button == 'Låg') {
+    unemploymentLevelChart = lowUnemployment2022;
+  }
+  else if (button == 'Medel') {
+    unemploymentLevelChart = mediumUnemployment2022;
+  }
+  else if (button == 'Hög') {
+    unemploymentLevelChart = highUnemployment2022;
+  }
+
+  drawGoogleChart({
+    type: 'ColumnChart',
+    data: makeChartFriendly(unemploymentLevelChart),
+    options: {
+      title: 'nånting',
+      height: 500,
+      chartArea: { left: 80 },
+      hAxis: {
+        slantedText: true,
+        slantedAngle: 45
+      }
+    }
+  });
 
 /*
 SELECT 
