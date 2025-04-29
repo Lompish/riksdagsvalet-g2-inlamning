@@ -5,6 +5,12 @@ addMdToPage(`
 
 <br>
 
+#### Inledning:
+
+**Arbetslöshet är ett tillstånd som kan ha långtgående personliga, sociala och politiska konsekvenser**. Det kan påverka en individs känsla av sammanhang, skapa ekonomiska problem och hålla en person i utanförskap. På ett samhälleligt plan kan arbetslöshet skapa utmaningar för välfärdssystemen och samhällsekonomin om grupper hålls utanför arbetsmarknaden.
+
+
+
 * **Kan vi hitta en tydlig korrelation mellan arbetslöshet och hur benägna människor är att rösta?**
 
 * **Är valdeltagandet lägre i kommuner med hög arbetslöshet?** 
@@ -19,7 +25,7 @@ Vi tror oss kunna hitta ett ganska starkt samband mellan arbetslöshet och valde
 
 **Låt oss undersöka:**
 
-När vi tittar på datan finner vi att valdeltagandet i Sverige är högt: 
+Även om vi ser en sjunkande trend både här och internationellt (1) så ligger valdeltagandet i Sverige fortfarande på en mycket hög nivå. Detta bekräftas när vi tittar på den data vi hämtat hem. 
 
 `);
 
@@ -210,9 +216,9 @@ addMdToPage(`
   
 **Den lägsta siffran i vårt dataset är från valet 2022**, där *Södertälje* tar jumboplatsen med sina 71 procent. De hade då också en av landets högsta arbetslöshetssiffror på 7,25 procent.
 
-Det högsta valdeltagandet har *Danderyd*, som 2018 kom upp i hela 94 procents valdeltagande. De har också en av landets lägsta nivåer av arbetslöshet.
+Bland det högsta valdeltagandet i vår data har *Danderyd*, som i samma val kom upp i hela 92 procents valdeltagande. De har därtill en av landets lägsta nivåer av arbetslöshet (1,90 procent).
 
-Detta ser ut att vara en tydlig skillnad!
+Detta ser ut att vara en markant skillnad!
 `);
 
 let municipalityChartYear = addDropdown('År för vald kommun', [2018, 2022]);
@@ -359,10 +365,20 @@ let highestLowestByYear = {
 addMdToPage(`
   <br>
 
-  **Låt oss jämföra ** så blir det tydligt att variationerna är små. Med några få undantag rör sig valdeltagandet förhållandevis stadigt nånstans mellan 80-85 procent, även när vi filtrerar på de kommuner som har lägst eller högst arbetslöshet.
-
-  Våra vänner i *Danderyd* och *Södertälje* till trots.
+  **Som illustration: ett extremfall.** 
   
+  2022 hade *Lessebo* i Småland en av landets högsta valdeltagande. Hela 86 procent. Tillsammans med en arbetslöshetssiffra på 6,52 procent. Också det en av landets högsta.
+
+  Att jämföra med *Pajala* i Norrbotten som hade ett valdeltagande på 80 procent jämte endast 1,67 procent arbetslösa.  
+  
+  Lessebo har alltså ett valdeltagande som är 6 procentenheter *högre* än vad  Pajalas är, trots sin höga arbetslöshet.
+
+  Två datapunkter är givetvis inte representativa för helheten. Detta till trots ger de en bild av att skillnaderna inte är så stora som vi kanske tror.
+
+  <br>
+
+  **Här kan du själv jämföra**:
+
   `);
 
 let selectedYear2 = addDropdown('År', [2018, 2022]);
@@ -395,8 +411,15 @@ drawGoogleChart({
 addMdToPage(`
   <br>
 
-  **Men, om vi ser efter** så blir det tydligt att variationerna är små. Med några få undantag rör sig valdeltagandet förhållandevis stadigt nånstans mellan 80-85 procent, även när vi filtrerar på de kommuner som har lägst eller högst arbetslöshet.
+  **Negativa resultat är också resultat**. Förvånande nog tycks vår hypotes inte hålla. Den korrelation vi trodde att vi skulle se verkar inte finnas i den data vi har till hands.
 
-  Våra vänner i *Danderyd* och *Södertälje* till trots.
+  Med det sagt, 
+
+
+  (1) https://www.gp.se/nyheter/varlden/demokratirapport-sverige-samre-an-sina-grannlander.1ec210d0-2b08-4a6a-81ba-86b9d9b09637
+
+
+
+
   
   `);
