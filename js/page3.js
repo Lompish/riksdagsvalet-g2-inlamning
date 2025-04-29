@@ -1,19 +1,33 @@
 
 addMdToPage(`
 
-## Valdeltagande i relation till arbetslöshet.  
+## Valdeltagande i relation till arbetslöshet 
 
 <br>
 
-* Kan vi se ett samband mellan arbetslöshet och valdeltagande?
+* **Kan vi hitta en tydlig korrelation mellan arbetslöshet och hur benägna människor är att rösta?**
 
-* Är människor mindre benägna att rösta i kommuner med hög arbetslöshet? 
+* **Är valdeltagandet lägre i kommuner med hög arbetslöshet?** 
 
-* Finns det en förändring över de olika åren? 
-
-
+* **Finns det en förändring över de olika åren?** 
 
 <br>
+
+#### Hypotes:
+
+Vi tror oss kunna hitta ett ganska starkt samband mellan arbetslöshet och valdeltagande, där *hög* arbetslöshet påverkar valdeltagandet *negativt* och vice versa. Dvs i kommuner med *låg* arbetslöshet kommer benägenheten att gå till valurnorna vara *högre*.
+
+**Låt oss undersöka:**
+
+När vi tittar på datan finner vi att valdeltagandet i Sverige är högt. 
+
+Den lägsta siffran i vårt dataset är från valet 2022, där Södertälje tar jumboplatsen med sina 71 procent. De hade då också en av landets högsta arbetslöshetssiffror på 7,25 procent.
+
+Det högsta valdeltagandet har Danderyd, som 2018 kom upp i hela 94 procents valdeltagande. De har också en av landets lägsta nivåer av arbetslöshet.
+
+**2022**: **Lessebo** (hög arbetslöshet) har ett **6 procentenheter högre valdeltagande** än **Pajala** (låg arbetslöshet).
+
+
 
 `);
 
