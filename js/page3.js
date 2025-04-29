@@ -5,9 +5,13 @@ addMdToPage(`
 
 <br>
 
-* Är valdeltagandet lägre i kommuner med hög arbetslöshet?
+* Kan vi se ett samband mellan arbetslöshet och valdeltagande?
 
-* Är valdeltagandet högre i kommuner med lägre arbetslöshet?
+* Är människor mindre benägna att rösta i kommuner med hög arbetslöshet? 
+
+* Finns det en förändring över de olika åren? 
+
+
 
 <br>
 
@@ -149,12 +153,7 @@ let unemploymentGroupsByYear = {
     { label: 'Medelmåttig', data: mediumUnemployment2022 }
   ]
 };
-/////
 
-
-
-
-// First Chart: Line chart for all municipalities based on the selected unemployment group
 let selectedYear = addDropdown('År', [2018, 2022]);
 let selectedGroups = unemploymentGroupsByYear[selectedYear];
 let selectedLevelLabel = addDropdown('Arbetslöshet på kommunnivå', selectedGroups.map(g => g.label));
@@ -185,10 +184,9 @@ drawGoogleChart({
   }
 });
 
-let municipalityList = [...new Set(unemploymentLevelChart.map(item => item.municipality))] // Get unique municipalities
+let municipalityList = [...new Set(unemploymentLevelChart.map(item => item.municipality))]
 
-// Sort the list alphabetically
-let selectedMunicipality = addDropdown('Välj en kommun (för ovan valda år)', municipalityList.sort((a, b) => a.localeCompare(b)));
+let selectedMunicipality = addDropdown('Enskilda kommuner (för ovan valda år)', municipalityList.sort((a, b) => a.localeCompare(b)));
 
 let selectedMunicipalityData = unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
 
@@ -229,26 +227,23 @@ let highestLowestByYear = {
 
   ]
 };
-// Third Chart: For the top 10 municipalities with the highest/lowest unemployment rates
+
 let selectedYear2 = addDropdown('År', [2018, 2022]);
 
-// Step 2: Dropdown for top 10 group (highest/lowest)
-let highestLowestGroups = highestLowestByYear[selectedYear2]; // Get groups based on the selected year
-let selectedHighestLowest = addDropdown('De tio kommuner med ', highestLowestGroups.map(g => g.label)); // Dropdown for "highest" or "lowest" unemployment
-let selectedHighestLowestGroup = highestLowestGroups.find(g => g.label === selectedHighestLowest); // Find the selected group
-
-// Step 3: Chart data (data for the selected highest/lowest group)
+let highestLowestGroups = highestLowestByYear[selectedYear2];
+let selectedHighestLowest = addDropdown('De tio kommuner med ', highestLowestGroups.map(g => g.label));
+let selectedHighestLowestGroup = highestLowestGroups.find(g => g.label === selectedHighestLowest);
 let highestLowestChartData = selectedHighestLowestGroup.data;
 
 let newHighestLowestChartData = makeChartFriendly(highestLowestChartData);
 newHighestLowestChartData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
 
-// Step 4: Draw the third chart
+
 drawGoogleChart({
   type: 'ColumnChart',
   data: newHighestLowestChartData,
   options: {
-    title: `${selectedHighestLowest} bland kommuner, topp tio (${selectedYear2}).`, // Title reflects selected year and group (highest/lowest)
+    title: `${selectedHighestLowest} bland kommuner, topp tio (${selectedYear2}).`,
     legend: '',
     height: 400,
     chartArea: { left: 80 },
