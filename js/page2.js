@@ -6,17 +6,13 @@ addMdToPage(`
 
   ________
 
-
-  I denna hypotes undersöker vi olika aspekter av medelinkomsten i Sverige under åren 2018 och 2022, samt hur vissa kommuner röstat i de två senaste riksdagsvalen i relation till förändringar i medelinkomstnivån.
-
-  Vi inleder med att presentera en översikt över samtliga svenska kommuners medelinkomst, rangordnade från högst till lägst. Diagrammet visar alla 290 kommuner som staplar, men på grund av utrymmesskäl är det interaktivt för att enklare hitta den kommun man söker. I diagrammet framträder en relativt jämn nivå bland kommunerna i mitten, men skillnaderna blir tydliga när vi exempelvis jämför Danderyd och Åsele.
 `);
 
 // läser in data från MongoDB
 dbQuery.use('kommun-info-mongodb');
 
 // skapa en dropdown för att välja år
-let year = addDropdown('Välj år för att se medelinkomsten i Sverige', [2018, 2022, 'Båda']);
+let year = addDropdown('Välj år för att se medelinkomsten i svenska kommuner', [2018, 2022, 'Båda']);
 
 // skapar en variabel som läser in specifikt inkomst per kommun från MongoDB, inkluderar alla kön
 let kommuner18 = await dbQuery.collection('incomeByKommun')
@@ -87,6 +83,11 @@ drawGoogleChart({
   data: makeChartFriendly(chart1data, 'Kommun', 'Medelinkomst (TSEK)'),
   options: {
     title,
+    animation: { // lägger till en animation när diagrammet laddas
+      startup: true,
+      duration: 1000,
+      easing: 'out'
+    },
     height: 600,
     chartArea: { left: 75, bottom: 150, width: '90%' },
     legend: { position: 'top' }, // flyttar legend till toppen av diagrammet
@@ -103,6 +104,10 @@ addMdToPage(`
   <br/>`)
 
 addMdToPage(`
+  I denna hypotes undersöker vi olika aspekter av medelinkomsten i Sverige under åren 2018 och 2022, samt hur vissa kommuner röstat i de två senaste riksdagsvalen i relation till förändringar i medelinkomstnivån.
+
+  Vi inleder med att presentera en översikt över samtliga svenska kommuners medelinkomst, rangordnade från högst till lägst. Diagrammet visar alla 290 kommuner som staplar, men på grund av utrymmesskäl är det interaktivt för att enklare hitta den kommun man söker. I diagrammet framträder en relativt jämn nivå bland kommunerna i mitten, men skillnaderna blir tydliga när vi exempelvis jämför Danderyd och Åsele.
+
   Vårt huvudsakliga fokus ligger på de kommuner med lägst inkomster. Vi har därför särskilt granskat de tio kommuner som 2018 hade den lägsta medelinkomsten. Samtliga av dessa kommuner har haft en positiv utveckling, med ökningar mellan 11,82 och 15,81 procent fram till 2022.
 `)
 
@@ -354,3 +359,9 @@ addMdToPage(`
 Resultaten stödjer i huvudsak hypotesen.
 I kommuner med låg inkomstnivå och en relativt svag ökning av inkomster mellan 2018 och 2022 har oppositionens partier som helhet behållit eller förstärkt sitt stöd. Socialdemokraterna tappar i viss mån, men det kompenseras av ökat stöd för övriga oppositionspartier. Det finns dock avvikelser, exempelvis Perstorp, där utvecklingen istället gynnat ett parti inom regeringsunderlaget.`)
 
+addMdToPage(`
+  <br/>`)
+
+addMdToPage(`
+  Sida av: Malin 
+  `)
