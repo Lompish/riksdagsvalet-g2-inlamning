@@ -120,34 +120,37 @@ let inPercent2018 = inPercent.filter(x => x.year == 2018).map(({ municipality, u
 let inPercent2022 = inPercent.filter(x => x.year == 2022).map(({ municipality, unemployedPercent, turnout }) => ({ municipality, unemployedPercent, turnout }))
 
 inPercent2018.sort((a, b) => a.unemployedPercent > b.unemployedPercent ? 1 : -1)
-console.log('inPercent2018', inPercent2018);
 
 inPercent2022.sort((a, b) => a.unemployedPercent > b.unemployedPercent ? 1 : -1)
 
 let unemployment2018 = inPercent2018.map(x => x.unemployedPercent)
 
+let topTenLowest2018 = inPercent2018.slice(0, 10)
 let lowUnemployment2018 = inPercent2018.slice(0, 96)
 let mediumUnemployment2018 = inPercent2018.slice(96, 192)
 let highUnemployment2018 = inPercent2018.slice(192)
+let topTenHighest2018 = inPercent2018.slice(-10)
 
 let lowUnemployment2022 = inPercent2022.slice(0, 96)
 let mediumUnemployment2022 = inPercent2022.slice(96, 192)
 let highUnemployment2022 = inPercent2022.slice(192)
-
-console.log(lowUnemployment2018)
-console.log(mediumUnemployment2018)
-console.log(highUnemployment2018)
+let topTenLowest2022 = inPercent2022.slice(0, 10)
+let topTenHighest2022 = inPercent2022.slice(-10)
 
 let unemploymentGroups = [
   { label: 'lowUnemployment2018', data: lowUnemployment2018 },
   { label: 'mediumUnemployment2018', data: mediumUnemployment2018 },
-  { label: 'highUnemployment2018', data: highUnemployment2018 }
+  { label: 'highUnemployment2018', data: highUnemployment2018 },
+  { label: 'topTenLowest2018', data: topTenLowest2018 },
+  { label: 'topTenHighest2018', data: topTenHighest2018 }
 ]
 
 let unemplymentGroups2022 = [
   { label: 'lowUnemployment2022', data: lowUnemployment2022 },
   { label: 'mediumUnemployment2022', data: mediumUnemployment2022 },
-  { label: 'highUnemployment2022', data: highUnemployment2022 }
+  { label: 'highUnemployment2022', data: highUnemployment2022 },
+  { label: 'topTenLowest2022', data: topTenLowest2022 },
+  { label: 'topTenHighest2022', data: topTenHighest2022 }
 ]
 
 let unemploymentGroupsByYear = {
@@ -162,29 +165,28 @@ let unemploymentGroupsByYear = {
     { label: 'Hög arbetslöshetsnivå', data: highUnemployment2022 }
   ]
 };
-////Existing: Select year and unemployment group
+
 let selectedYear = addDropdown('År', [2018, 2022]);
 let selectedGroups = unemploymentGroupsByYear[selectedYear];
 let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
 let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
 let unemploymentLevelChart = selectedGroup.data;
 
-// 👇 NEW: Add dropdown for municipality
-let municipalityNames = unemploymentLevelChart.map(item => item.municipality); // note: it's `municipality`, not `kommun`
-let selectedMunicipality = addDropdown('Kommun', ['Alla', ...municipalityNames]); // Add 'Alla' as default
+let municipalityNames = unemploymentLevelChart.map(item => item.municipality);
+let selectedMunicipality = addDropdown('Kommun', ['Samtliga', ...municipalityNames]);
 
-// 👇 Filter chart data based on municipality selection
-let chartData = selectedMunicipality === 'Alla'
+let chartData = selectedMunicipality === 'Samtliga'
   ? unemploymentLevelChart
   : unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
 
-// Draw the chart
 drawGoogleChart({
   type: 'ColumnChart',
   data: makeChartFriendly(chartData),
   options: {
-    title: `Arbetslöshet och valdeltagande per kommun (${selectedYear}) – ${selectedLevelLabel}${selectedMunicipality !== 'Alla' ? ', ' + selectedMunicipality : ''}`,
-    legend: '',
+    title: `Arbetslöshet och valdeltagande per kommun (${selectedYear}) ${selectedLevelLabel}${selectedMunicipality !== 'Alla' ? ', ' + selectedMunicipality : ''}`,
+    legend: {
+      position: 'right',
+    },
     height: 500,
     chartArea: { left: 80 },
     hAxis: {
@@ -194,97 +196,42 @@ drawGoogleChart({
     colors: ['#3366cc', '#dc3912']
   }
 });
-//////
 
-/*
+let highestLowestByYear = {
+  2018: [
+    { label: 'lägst arbetslöshet', data: topTenLowest2018 },
+    { label: 'högst arbetslöshet', data: topTenHighest2018 }
+  ],
+  2022: [
+    { label: 'lägst arbetslöshet', data: topTenLowest2022 },
+    { label: 'högst arbetslöshet', data: topTenHighest2022 }
+  ]
+};
 
-let selectedYear = addDropdown('År', [2018, 2022]);
+// Step 1: Dropdown for year
+let selectedYear2 = addDropdown('År', [2018, 2022]);
 
-let selectedGroups = unemploymentGroupsByYear[selectedYear];
+// Step 2: Dropdown for top 10 group
+let highestLowestGroups = highestLowestByYear[selectedYear2];
+let selectedHighestLowest = addDropdown('De tio kommuner med ', highestLowestGroups.map(g => g.label));
+let selectedHighestLowestGroup = highestLowestGroups.find(g => g.label === selectedHighestLowest);
 
-let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
+// Step 3: Chart data
+let highestLowestChartData = selectedHighestLowestGroup.data;
 
-let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
-
-let unemploymentLevelChart = selectedGroup.data;
-
-
+// Step 4: Draw the second chart
 drawGoogleChart({
   type: 'ColumnChart',
-  data: makeChartFriendly(unemploymentLevelChart),
+  data: makeChartFriendly(highestLowestChartData),
   options: {
-    title: `Arbetslöshet och valdeltagande per kommun (${selectedYear}), (${selectedLevelLabel}).`,
+    title: `Topp 10 kommuner (${selectedYear2}) ${selectedHighestLowest}`,
     legend: '',
-    height: 500,
+    height: 400,
     chartArea: { left: 80 },
     hAxis: {
       slantedText: true,
       slantedAngle: 45
-    }
+    },
+    colors: ['#109618', '#990099']
   }
 });
-
-
-
-
-
-/////////
-
-
-
-
-/*
-// Extract available municipalities from current dataset
-let municipalityNames = unemploymentLevelChart.map(item => item.kommun);
-
-// Add a dropdown for selecting a single municipality
-let selectedMunicipality = addDropdown('Kommun', municipalityNames);
-
-let selectedData = unemploymentLevelChart.find(item => item.kommun === selectedMunicipality);
-
-console.log('unemploymentLevelChart', unemploymentLevelChart[0])
-
-drawGoogleChart({
-  type: 'ColumnChart',
-  data: makeChartFriendly(unemploymentLevelChart),
-  options: {
-    title: 'nånting',
-    height: 500,
-    chartArea: { left: 80 },
-    hAxis: {
-      slantedText: true,
-      slantedAngle: 45
-    }
-  }
-});
-
-
-SELECT 
-  municipality, 
-  SUM(population2018) AS population2018, 
-  SUM(population2022) AS population2022
-FROM population
-WHERE age BETWEEN 18 AND 100
-GROUP BY municipality
-ORDER BY municipality;
-
-
-let inPercent = unemployed2018And2022
-  .map(x => {
-    let matchingPop = population2018And2022
-      .find(y => x.year == y.year && x.municipality == y.municipality);
-
-    if (matchingPop && matchingPop.population) {
-      return {
-        ...x,
-        unemploymentPercent: ((x.unemployed / matchingPop.population) * 100).toFixed(2)
-      };
-    } else {
-      return {
-        ...x,
-        unemploymentPercent: null
-      };
-    }
-  });
-*/
-
