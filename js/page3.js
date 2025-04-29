@@ -147,65 +147,71 @@ console.log(highUnemployment2018)
 let unemploymentGroups = [
   { label: 'lowUnemployment2018', data: lowUnemployment2018 },
   { label: 'mediumUnemployment2018', data: mediumUnemployment2018 },
-  { label: 'highUnemployment2018', data: highUnemployment2018 },
+  { label: 'highUnemployment2018', data: highUnemployment2018 }
+]
+
+let unemplymentGroups2022 = [
   { label: 'lowUnemployment2022', data: lowUnemployment2022 },
   { label: 'mediumUnemployment2022', data: mediumUnemployment2022 },
   { label: 'highUnemployment2022', data: highUnemployment2022 }
 ]
 
-// User interface for choosing a group and filter out outliers
-export function chooseGroupPlusOutlierFiltering(dropdownLabel, groups, chosen1, chosen2) {
-  // Dropdowns for choice of group + filtering of outliers
-  let chosenGroupLabel = addDropdown(dropdownLabel, groups.map(x => x.label), chosen1);
-  let filterOutliers = addDropdown('Extremvärden', [
-    'Ja, ingen filtrering', 'Nej, ta bort mer än ± 3 x standardavvikelse',
-    'Nej, ta bort lägsta och högsta 5% percentiler', 'Nej, ta bort lägsta och högsta 10% percentiler'], chosen2);
+let unemploymentGroupsByYear = {
+  2018: [
+    { label: 'Låg', data: lowUnemployment2018 },
+    { label: 'Medel', data: mediumUnemployment2018 },
+    { label: 'Hög', data: highUnemployment2018 }
+  ],
+  2022: [
+    { label: 'Låg', data: lowUnemployment2022 },
+    { label: 'Medel', data: mediumUnemployment2022 },
+    { label: 'Hög', data: highUnemployment2022 }
+  ]
+};
 
-  let year = addDropdown('År', [2018, 2022]);
-  if (year == 2018) {
-    unemployedForChart = unemploymentSections;
-  }
-  else if (year == 2022) {
-    unemployedForChart = unemploymentSections;
-  }
+let selectedYear = addDropdown('År', [2018, 2022]);
 
-  let unemploymentSections = addDropdown('Arbetslöshetsgrad', ['Låg', 'Medel', 'Hög']);
-  if (button == 'Låg') {
-    unemploymentLevelChart = lowUnemployment2018;
-  }
-  else if (button == 'Medel') {
-    unemploymentLevelChart = mediumUnemployment2018;
-  }
-  else if (button == 'Hög') {
-    unemploymentLevelChart = highUnemployment2018;
-  }
+let selectedGroups = unemploymentGroupsByYear[selectedYear];
 
-  let unemploymentSections2022 = addDropdown('Arbetslöshetsgrad', ['Låg', 'Medel', 'Hög']);
-  if (button == 'Låg') {
-    unemploymentLevelChart = lowUnemployment2022;
-  }
-  else if (button == 'Medel') {
-    unemploymentLevelChart = mediumUnemployment2022;
-  }
-  else if (button == 'Hög') {
-    unemploymentLevelChart = highUnemployment2022;
-  }
+let selectedLevelLabel = addDropdown('Arbetslöshetsgrad', selectedGroups.map(g => g.label));
 
-  drawGoogleChart({
-    type: 'ColumnChart',
-    data: makeChartFriendly(unemploymentLevelChart),
-    options: {
-      title: 'nånting',
-      height: 500,
-      chartArea: { left: 80 },
-      hAxis: {
-        slantedText: true,
-        slantedAngle: 45
-      }
+let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
+
+let unemploymentLevelChart = selectedGroup.data;
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: makeChartFriendly(unemploymentLevelChart),
+  options: {
+    title: 'nånting',
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
     }
-  });
+  }
+});
 
+
+
+/////////
 /*
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: makeChartFriendly(unemploymentLevelChart),
+  options: {
+    title: 'nånting',
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    }
+  }
+});
+
+
 SELECT 
   municipality, 
   SUM(population2018) AS population2018, 
