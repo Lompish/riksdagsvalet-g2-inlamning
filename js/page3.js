@@ -136,13 +136,30 @@ let lowUnemployment2018 = inPercent2018.slice(0, 96)
 let mediumUnemployment2018 = inPercent2018.slice(96, 192)
 let highUnemployment2018 = inPercent2018.slice(192)
 
+let lowUnemployment2022 = inPercent2022.slice(0, 96)
+let mediumUnemployment2022 = inPercent2022.slice(96, 192)
+let highUnemployment2022 = inPercent2022.slice(192)
+
 console.log(lowUnemployment2018)
 console.log(mediumUnemployment2018)
 console.log(highUnemployment2018)
 
+let unemploymentLevelChart;
+
+let button = addDropdown('Arbetslöshetsgrad', ['Låg', 'Medel', 'Hög']);
+if (button == 'Låg') {
+  unemploymentLevelChart = lowUnemployment2018;
+}
+else if (button == 'Medel') {
+  unemploymentLevelChart = mediumUnemployment2018;
+}
+else if (button == 'Hög') {
+  unemploymentLevelChart = highUnemployment2018;
+}
+
 drawGoogleChart({
   type: 'ColumnChart',
-  data: makeChartFriendly(highUnemployment2018),
+  data: makeChartFriendly(unemploymentLevelChart),
   options: {
     title: 'nånting',
     height: 500,
