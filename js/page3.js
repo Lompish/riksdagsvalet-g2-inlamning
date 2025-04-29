@@ -38,8 +38,6 @@ let totalUnemployed = unemployed2018And2022
   .map(x => ({ municipality: x.municipality, unemployed2018: x.unemployed }))
   .map(x => ({ ...x, unemployed2022: unemployed2022.find(y => y.municipality == x.municipality).unemployed }));
 
-console.log('unemployed2018And2022', unemployed2018And2022[0])
-
 // Turnout  
 
 dbQuery.use('eligibleVotersAge-sqlite');
@@ -140,17 +138,220 @@ let unemplymentGroups2022 = [
 
 let unemploymentGroupsByYear = {
   2018: [
-    { label: 'Låg arbetslöshetsnivå', data: lowUnemployment2018 },
-    { label: 'Medel arbetslöshetsnivå', data: mediumUnemployment2018 },
-    { label: 'Hög arbetslöshetsnivå', data: highUnemployment2018 }
+    { label: 'Hög', data: highUnemployment2018 },
+    { label: 'Låg', data: lowUnemployment2018 },
+    { label: 'Medel', data: mediumUnemployment2018 }
+
   ],
   2022: [
-    { label: 'Låg arbetslöshetsnivå', data: lowUnemployment2022 },
-    { label: 'Medel arbetslöshetsnivå', data: mediumUnemployment2022 },
-    { label: 'Hög arbetslöshetsnivå', data: highUnemployment2022 }
+    { label: 'Hög', data: highUnemployment2022 },
+    { label: 'Låg', data: lowUnemployment2022 },
+    { label: 'Medel', data: mediumUnemployment2022 }
   ]
 };
+/////
 
+// First Chart: Line chart for all municipalities based on the selected unemployment group
+let selectedYear = addDropdown('År', [2018, 2022]);
+let selectedGroups = unemploymentGroupsByYear[selectedYear];
+let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
+let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
+let unemploymentLevelChart = selectedGroup.data;
+
+let chartData = makeChartFriendly(unemploymentLevelChart);
+chartData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+drawGoogleChart({
+  type: 'LineChart',
+  data: chartData,
+  options: {
+    title: `Valdeltagande per kommun. Arbetslöshetsgrad: ${selectedLevelLabel}. År ${selectedYear}`,
+    legend: { position: 'right' },
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange'],
+    series: {
+      0: { lineWidth: 4 },
+      1: { lineWidth: 4 }
+    }
+  }
+});
+
+// Second Chart: Separate chart for a single municipality
+let selectedMunicipality = addDropdown('Välj en kommun', ['Samtliga', ...unemploymentLevelChart.map(item => item.municipality)]); // Use the list of municipalities from the dataset
+
+let selectedMunicipalityData = selectedMunicipality === 'Samtliga'
+  ? unemploymentLevelChart
+  : unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
+
+let formattedMunicipalityData = makeChartFriendly(selectedMunicipalityData);
+
+formattedMunicipalityData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: formattedMunicipalityData,
+  options: {
+    title: `Arbetslöshet och valdeltagande i ${selectedMunicipality}, år ${selectedYear} (i procent).`,
+    legend: {
+      position: 'right',
+      alignment: 'start',
+      maxLines: 3
+    },
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+console.log('formattedMunicipalityData', formattedMunicipalityData)
+
+
+let highestLowestByYear = {
+  2018: [
+    { label: 'Högst arbetslöshet', data: topTenHighest2018 },
+    { label: 'Lägst arbetslöshet', data: topTenLowest2018 }
+  ],
+  2022: [
+    { label: 'Högst arbetslöshet', data: topTenHighest2022 },
+    { label: 'Lägst arbetslöshet', data: topTenLowest2022 }
+
+  ]
+};
+// Third Chart: For the top 10 municipalities with the highest/lowest unemployment rates
+let selectedYear2 = addDropdown('År', [2018, 2022]);
+
+// Step 2: Dropdown for top 10 group (highest/lowest)
+let highestLowestGroups = highestLowestByYear[selectedYear2]; // Get groups based on the selected year
+let selectedHighestLowest = addDropdown('De tio kommuner med ', highestLowestGroups.map(g => g.label)); // Dropdown for "highest" or "lowest" unemployment
+let selectedHighestLowestGroup = highestLowestGroups.find(g => g.label === selectedHighestLowest); // Find the selected group
+
+// Step 3: Chart data (data for the selected highest/lowest group)
+let highestLowestChartData = selectedHighestLowestGroup.data;
+
+let newHighestLowestChartData = makeChartFriendly(highestLowestChartData);
+newHighestLowestChartData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+// Step 4: Draw the third chart
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: newHighestLowestChartData,
+  options: {
+    title: `${selectedHighestLowest}, topp tio (${selectedYear2}).`, // Title reflects selected year and group (highest/lowest)
+    legend: '',
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+console.log('newHighestLowestChartData', newHighestLowestChartData)
+/////
+
+/*
+let selectedYear = addDropdown('År', [2018, 2022]);
+let selectedGroups = unemploymentGroupsByYear[selectedYear];
+let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
+let selectedGroup = selectedGroups.find(g => g.label === selectedLevelLabel);
+let unemploymentLevelChart = selectedGroup.data;
+
+let chartData = makeChartFriendly(unemploymentLevelChart);
+
+chartData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+drawGoogleChart({
+  type: 'LineChart',
+  data: chartData,
+  options: {
+    title: `Valdeltagande per kommun. Arbetslöshetsgrad: ${selectedLevelLabel}. År ${selectedYear}`,
+    legend: { position: 'right' },
+    height: 500,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange'],
+    series: {
+      0: { lineWidth: 4 },
+      1: { lineWidth: 4 }
+    }
+  }
+});
+// Second Chart: Separate chart for a single municipality
+let selectedMunicipality = addDropdown('Välj en kommun', ['Samtliga', ...unemploymentLevelChart.map(item => item.municipality)]); // Use the list of municipalities from the dataset
+
+let selectedMunicipalityData = selectedMunicipality === 'Samtliga'
+  ? unemploymentLevelChart
+  : unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
+
+let formattedMunicipalityData = makeChartFriendly(selectedMunicipalityData);
+
+formattedMunicipalityData[0] = ['Kommun', 'Arbetslöshet', 'Valdeltagande'];
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: formattedMunicipalityData,
+  options: {
+    title: `Arbetslöshet och valdeltagande i ${selectedMunicipality} år ${selectedYear} (i procent).`,
+    legend: {
+      position: 'right',
+      alignment: 'start',
+      maxLines: 3
+    },
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+// Step 1: Dropdown for year
+let selectedYear2 = addDropdown('År', [2018, 2022]);
+
+// Step 2: Dropdown for top 10 group (highest/lowest)
+let highestLowestGroups = highestLowestByYear[selectedYear2]; // Get groups based on the selected year
+let selectedHighestLowest = addDropdown('De tio kommuner med ', highestLowestGroups.map(g => g.label)); // Dropdown for "highest" or "lowest" unemployment
+let selectedHighestLowestGroup = highestLowestGroups.find(g => g.label === selectedHighestLowest); // Find the selected group
+
+// Step 3: Chart data (data for the selected highest/lowest group)
+let highestLowestChartData = selectedHighestLowestGroup.data;
+
+// Step 4: Draw the third chart
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: makeChartFriendly(highestLowestChartData),
+  options: {
+    title: `Topp 10 kommuner (${selectedYear2}) ${selectedHighestLowest}`, // Title reflects selected year and group (highest/lowest)
+    legend: '',
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+
+/*
+/////
 let selectedYear = addDropdown('År', [2018, 2022]);
 let selectedGroups = unemploymentGroupsByYear[selectedYear];
 let selectedLevelLabel = addDropdown('Arbetslöshet', selectedGroups.map(g => g.label));
@@ -164,13 +365,18 @@ let chartData = selectedMunicipality === 'Samtliga'
   ? unemploymentLevelChart
   : unemploymentLevelChart.filter(item => item.municipality === selectedMunicipality);
 
+let newChartData = makeChartFriendly(chartData);
+
+
+newChartData[0] = ['Kommun', 'Arbetslöshet ', 'Valdeltagande'];
+
 drawGoogleChart({
-  type: 'ColumnChart',
-  data: makeChartFriendly(chartData),
+  type: 'LineChart',
+  data: newChartData,
   options: {
     title: `Arbetslöshet och valdeltagande per kommun (${selectedYear}) ${selectedLevelLabel}${selectedMunicipality !== 'Alla' ? ', ' + selectedMunicipality : ''}`,
     legend: {
-      position: 'right',
+      position: 'right'
     },
     height: 500,
     chartArea: { left: 80 },
@@ -178,7 +384,11 @@ drawGoogleChart({
       slantedText: true,
       slantedAngle: 45
     },
-    colors: ['green', 'orange']
+    colors: ['green', 'orange'],
+    series: {
+      0: { lineWidth: 4 },
+      1: { lineWidth: 4 }
+    }
   }
 });
 
@@ -192,6 +402,44 @@ let highestLowestByYear = {
     { label: 'högst arbetslöshet', data: topTenHighest2022 }
   ]
 };
+
+
+let newSelectedYear = addDropdown('År', [2018, 2022]);
+
+let highestLowestGroups = highestLowestByYear[newSelectedYear];
+let selectedHighestLowest = addDropdown('De tio kommuner med ', highestLowestGroups.map(g => g.label));
+let selectedHighestLowestGroup = highestLowestGroups.find(g => g.label === selectedHighestLowest);
+
+let highestLowestChartData = selectedHighestLowestGroup.data;
+
+let formattedChartData = makeChartFriendly(highestLowestChartData);
+
+let unemployedLabel = `Arbetslöshet`;
+let turnoutLabel = 'Valdeltagande';
+
+formattedChartData[0] = ['Kommun', unemployedLabel, turnoutLabel];
+
+drawGoogleChart({
+  type: 'ColumnChart',
+  data: formattedChartData,
+  options: {
+    title: `De 10 kommuner med ${selectedHighestLowest} (${newSelectedYear}) `,
+    legend: {
+      position: 'right',
+      alignment: 'start',
+      maxLines: 3
+    },
+    height: 400,
+    chartArea: { left: 80 },
+    hAxis: {
+      slantedText: true,
+      slantedAngle: 45
+    },
+    colors: ['green', 'orange']
+  }
+});
+
+//////////
 
 // Step 1: Dropdown for year
 let selectedYear2 = addDropdown('År', [2018, 2022]);
@@ -220,3 +468,5 @@ drawGoogleChart({
     colors: ['green', 'orange']
   }
 });
+
+*/
