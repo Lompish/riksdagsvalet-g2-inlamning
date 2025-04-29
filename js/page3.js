@@ -65,22 +65,7 @@ WHERE age = 'samtliga åldrar'
 GROUP BY municipality
 `);
 
-/*
-let combinedTurnout = await dbQuery(`
-SELECT 
-  municipality, 
-  votersPercent2018 AS turnout2018, 
-  votersPercent2022 AS turnout2022
-FROM eligibleVotersAge
-WHERE age = 'samtliga åldrar'
-GROUP BY municipality
-ORDER BY municipality;
-`);
-*/
-console.log('turnout', turnout2022)
 let combinedTurnout = [...turnout2018, ...turnout2022]
-
-
 
 //Population
 
@@ -193,7 +178,7 @@ drawGoogleChart({
       slantedText: true,
       slantedAngle: 45
     },
-    colors: ['#3366cc', '#dc3912']
+    colors: ['green', 'orange']
   }
 });
 
@@ -232,6 +217,6 @@ drawGoogleChart({
       slantedText: true,
       slantedAngle: 45
     },
-    colors: ['#109618', '#990099']
+    colors: ['green', 'orange']
   }
 });
