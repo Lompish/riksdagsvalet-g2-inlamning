@@ -278,9 +278,9 @@ addMdToPage(`
   <br/>`)
 addMdToPage(`Avslutningsvis visualiserar vi hur stödet för de två politiska blocken – Oppositionen och Regeringsunderlaget – har förändrats i de utvalda kommunerna. För tydlighetens skull definierar vi här blocken som:
 
-* **Regeringsunderlag:** Moderaterna, Kristdemokraterna, Liberalerna, Sverigedemokraterna
+* **högerblocket:** Moderaterna, Kristdemokraterna, Liberalerna, Sverigedemokraterna
 
-* **Opposition:** Arbetarepartiet-Socialdemokraterna, Vänsterpartiet, Miljöpartiet, Centerpartiet
+* **Mitten-Vänsterblocket:** Arbetarepartiet-Socialdemokraterna, Vänsterpartiet, Miljöpartiet, Centerpartiet
 
 I diagrammet framgår att samtliga kommuner, trots att Socialdemokraterna tappat i stöd, ändå totalt sett ökat sitt stöd för oppositionen mellan de två riksdagsvalen.
 `)
