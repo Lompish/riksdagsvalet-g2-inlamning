@@ -3,13 +3,13 @@ addMdToPage(`
 
 ## Valdeltagande i relation till arbetslöshet 
 
-<br>
-
 #### Inledning:
 
-**Arbetslöshet är ett tillstånd som kan ha långtgående personliga, sociala och politiska konsekvenser**. Det kan påverka en individs känsla av sammanhang, skapa ekonomiska problem och hålla en person i utanförskap. På ett samhälleligt plan kan arbetslöshet skapa utmaningar för välfärdssystemen och samhällsekonomin om grupper hålls utanför arbetsmarknaden.
+**Arbetslöshet är ett tillstånd som kan ha långtgående personliga, sociala och politiska konsekvenser**. Att vara utan arbete kan påverka en individs känsla av sammanhang, skapa ekonomiska problem och hålla en person i utanförskap. På ett samhälleligt plan kan det skapa utmaningar för välfärdssystemen och samhällsekonomin om grupper hålls utanför arbetsmarknaden.
 
+Det ligger nära till hands att tänka sig att den som är utan arbete har andra saker att oroa sig över än samhällsutvecklingen. Å andra sidan kan det förstås också skapa incitament till ett större politiskt engagemang.
 
+Detta väcker frågor!
 
 * **Kan vi hitta en tydlig korrelation mellan arbetslöshet och hur benägna människor är att rösta?**
 
@@ -17,15 +17,18 @@ addMdToPage(`
 
 * **Finns det en förändring över de olika åren?** 
 
-<br>
 
-#### Hypotes:
+#### Nulllhypotes: 
 
-Vi tror oss kunna hitta ett ganska starkt samband mellan arbetslöshet och valdeltagande, där *hög* arbetslöshet påverkar valdeltagandet *negativt* och vice versa. Dvs i kommuner med *låg* arbetslöshet kommer benägenheten att gå till valurnorna vara *högre*.
+* Det finns ingen tydlig korrelation mellan arbetslöshet och valdeltagande.
+
+#### Alternativhypotes:
+
+* Vi tror oss kunna hitta ett ganska starkt samband mellan arbetslöshet och valdeltagande, där *hög* arbetslöshet påverkar valdeltagandet *negativt* och vice versa. Dvs i kommuner med *låg* arbetslöshet kommer benägenheten att gå till valurnorna vara *högre*.
 
 **Låt oss undersöka:**
 
-Även om vi ser en sjunkande trend både här och internationellt (1) så ligger valdeltagandet i Sverige fortfarande på en mycket hög nivå. Detta bekräftas när vi tittar på den data vi hämtat hem. 
+Även om vi ser en sjunkande trend både här och internationellt #(1) så ligger valdeltagandet i Sverige fortfarande på en mycket hög nivå. Detta bekräftas när vi tittar på den data vi hämtat hem. 
 
 `);
 
