@@ -296,8 +296,8 @@ let rawResultsGrouped = await dbQuery(`
 
 // nedan skapar vi en ny variabel som grupperar partierna i två olika grupper: Regeringsunderlag och Opposition, för att det senare ska vara lättare att visualisera i ett stapeldiagram. 
 let grupper = {
-  'Regeringsunderlag': ['Moderaterna', 'Kristdemokraterna', 'Liberalerna ', 'Sverigedemokraterna'],
-  'Opposition': ['Arbetarepartiet-Socialdemokraterna', 'Vänsterpartiet', 'Miljöpartiet', 'Centerpartiet']
+  'Hogerblocket': ['Moderaterna', 'Kristdemokraterna', 'Liberalerna ', 'Sverigedemokraterna'],
+  'Mitten_Vansterblocket': ['Arbetarepartiet-Socialdemokraterna', 'Vänsterpartiet', 'Miljöpartiet', 'Centerpartiet']
 };
 
 // vi skapar en ny variabel som ska gruppera kommunerna, tar bort dubbletter och skapar en lista med unika kommuner.
@@ -305,7 +305,7 @@ let kommunerGrouped = [...new Set(rawResultsGrouped.map(x => x.Kommun))];
 
 // skapar en start-array (chartData) som ser ut som en tabell. 
 let chartData = [
-  ['Kommun', 'Opposition 2018', 'Opposition 2022', 'Regeringsunderlag 2018', 'Regeringsunderlag 2022']
+  ['Kommun', 'Mitten-Vänsterblocket 2018', 'Mitten-Vänsterblocket 2022', 'Högerblocket 2018', 'Högerblocket 2022']
 ];
 
 // För varje kommun räknas rösterna ihop, sorterat på opposition / regering och år, och sparas i en tabell(chartData) som kan användas för att vi sedan ska kunna rita ett diagram.
@@ -315,10 +315,10 @@ for (let kommun of kommunerGrouped) {
   let reg2018 = 0, reg2022 = 0, opp2018 = 0, opp2022 = 0;
 
   for (let row of kommunData) {
-    if (grupper['Opposition'].includes(row.Parti)) {
+    if (grupper['Mitten_Vansterblocket'].includes(row.Parti)) {
       opp2018 += row.Röster_2018 || 0;
       opp2022 += row.Röster_2022 || 0;
-    } else if (grupper['Regeringsunderlag'].includes(row.Parti)) {
+    } else if (grupper['Hogerblocket'].includes(row.Parti)) {
       reg2018 += row.Röster_2018 || 0;
       reg2022 += row.Röster_2022 || 0;
     }
@@ -362,6 +362,3 @@ I kommuner med låg inkomstnivå och en relativt svag ökning av inkomster mella
 addMdToPage(`
   <br/>`)
 
-addMdToPage(`
-  Sida av: Malin 
-  `)
