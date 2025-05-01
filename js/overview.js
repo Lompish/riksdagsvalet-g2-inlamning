@@ -1,16 +1,29 @@
 addMdToPage(`
-## Påverkar inkomstnivå politiska rörelsemönster i svenska kommuner?
 
-Vi vill undersöka om det finns ett samband mellan förändring i inkomstnivå (medel- och medianinkomst) och förändringar i röstmönster för olika partier mellan valen 2018 och 2022, på kommunnivå. Vi vill också veta om valdeltagandet påverkas av variabler som arbetslöshet och utbildningsnivå. 
+## Påverkar socioekonomiska faktorer valdeltagande och politiska rörelsemönster i svenska kommuner?
 
-**Hypoteser:**
+ 
 
-1. I de kommuner där inkomsterna ökat mest har partier inom tidö-samarbetet (M, Kd, L & SD) fått ett ökat antal röster mellan valen 2018-2022.  
+**Vi vill undersöka om faktorer som inkomst, arbetslöshet och utbildning påverkar valdeltagande och partisympatier i svenska kommuner, för riksdagsvalen 2018-2022.** 
 
-2. I de kommuner där inkomstökningen varit låg eller negativ har partierna i opposition (S, V, Mp och C) behållit eller ökat sitt stöd.
+I vår uppdelning av de politiska blocken har vi i vår undersökning inkluderat **Centerpartiet** i ett mitten-vänsterblock, tillsammans med **Miljöpartiet**, **Socialdemokraterna** och **Vänsterpartiet**. På högersidan har vi inkluderat **Sverigedemokraterna** i ett borgerligt-konservativt block tillsammans med **Kristdemokraterna**, **Liberalerna** och **Moderaterna**.
 
-3. Valdeltagandet är lägre i kommuner med hög arbetslöshet och högre i kommuner med lägre arbetslöshet.
+## Hypoteser:
 
-4. Valdeltagandet är lägre i kommuner med låg utbildningsnivå och högre i kommuner med hög utbildningsnivå.  
+**Inkomster och valresultat:**
+
+* I de kommuner där inkomsterna *ökat* mest har partier inom det **borgerligt-konservativa** blocket (M, Kd, L & SD) fått ett ökat antal röster mellan valen 2018-2022.
+
+  
+
+* I de kommuner där inkomstökningen varit *lägre* eller *negativ* har partierna i **mitten-vänsterblocket** (S, V, Mp och C) behållit eller ökat sitt stöd mellan valen 2018-2022.
+
+**Valdeltagande:**
+
+* Valdeltagandet är *lägre* i kommuner med hög arbetslöshet och *högre* i kommuner med lägre arbetslöshet.
+
+  
+
+* Valdeltagandet är *lägre* i kommuner med låg utbildningsnivå och *högre* i kommuner med hög utbildningsnivå.
  
 `);
