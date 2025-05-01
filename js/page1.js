@@ -3,18 +3,15 @@ addMdToPage(`
 *I de kommuner där inkomsterna ökat mest har partier inom tidö-samarbetet (M, Kd, L & SD) fått ett ökat antal röster mellan valen 2018-2022.*
 `);
 
-// --- DROPDOWN ---
-let val = addDropdown('Välj:', ['Start', 'Alla', 'Män', 'Kvinnor']);
+let val = addDropdown('Välj', ['Start', 'Alla', 'Män', 'Kvinnor']);
 
-
-// --- Hämta data ---
 dbQuery.use('kommun-info-mongodb');
 let inkomster = await dbQuery.collection('incomeByKommun').find({});
 
 dbQuery.use('riksdagsval-neo4j');
 let valresultat = await dbQuery('MATCH (n:Partiresultat) RETURN n');
 
-// --- Sortera inkomstdata ---
+// Sortera inkomstdata
 function sorteraInkomst(kön) {
   return inkomster
     .filter(x => x.kon === kön)
@@ -30,7 +27,7 @@ let inkomsterAlla = sorteraInkomst('totalt');
 let inkomsterMän = sorteraInkomst('män');
 let inkomsterKvinnor = sorteraInkomst('kvinnor');
 
-// --- Valdata per kommun ---
+// Valdata per kommun
 let rösterPerKommun = {};
 valresultat.forEach(x => {
   let kommun = x.kommun;
@@ -41,7 +38,7 @@ valresultat.forEach(x => {
   };
 });
 
-// --- Beräkna hela landet statistik ---
+// Beräkna hela landets statistik
 function beräknaLandData(inkomsterLista) {
   let genomsnittInkomstökning = inkomsterLista.reduce((sum, x) => sum + x.förändringInkomstProcent, 0) / inkomsterLista.length;
 
@@ -73,7 +70,7 @@ let landAlla = beräknaLandData(inkomsterAlla);
 let landMän = beräknaLandData(inkomsterMän);
 let landKvinnor = beräknaLandData(inkomsterKvinnor);
 
-// --- Kombinera kommunvis ---
+// Kombinera kommunvis
 function kombineraData(inkomsterLista) {
   return inkomsterLista.map(inkomst => {
     let röstdata = rösterPerKommun[inkomst.kommun] || {};
@@ -100,7 +97,7 @@ function kombineraData(inkomsterLista) {
   });
 }
 
-// --- Välj data beroende på dropdown ---
+// Välj data beroende på dropdown
 let kombineradLista;
 let landData;
 
@@ -135,13 +132,11 @@ let kommunMedTidö = kombineradLista.map(k => ({
   tidöAndel: beräknaTidöAndel(k)
 }));
 
-// Dela på median
 let sorterade = [...kommunMedTidö].sort((a, b) => a.inkomstökning - b.inkomstökning);
 let medianIndex = Math.floor(sorterade.length / 2);
 let låg = sorterade.slice(0, medianIndex);
 let hög = sorterade.slice(medianIndex);
 
-// Extrahera tidöandelar
 let andelarLåg = låg.map(k => k.tidöAndel);
 let andelarHög = hög.map(k => k.tidöAndel);
 
@@ -181,11 +176,7 @@ addMdToPage(`
 `);
 
 
-// --- Topp 10 kommuner ---
 let topLista = kombineradLista.sort((a, b) => b.förändringInkomstProcent - a.förändringInkomstProcent).slice(0, 10);
-
-// --- Visa tabell ---
-// --- Visa landets sammanfattning ---
 
 addMdToPage(`## Kommuner med störst inkomstökning (${val.toLowerCase()})`);
 
@@ -203,7 +194,6 @@ addMdToPage(`- Genomsnittlig inkomstökning i hela landet (${val.toLowerCase()})
 `);
 
 
-// --- Tidö vs Opposition graf (kommuner) ---
 let rowData2018 = [
   ['Kommun', 'Högerblocket 2018 (%)', 'Mitten-vänsterblocket 2018 (%)'],
   ...topLista.map(x => {
@@ -244,10 +234,9 @@ let rowData2022 = [
   })
 ];
 
-// --- Nu ritar vi enligt knappsystemet ---
 let data = [];
-data[0] = google.visualization.arrayToDataTable(rowData2022); // Default = 2022
-data[1] = google.visualization.arrayToDataTable(rowData2018); // Byta till 2018
+data[0] = google.visualization.arrayToDataTable(rowData2022);
+data[1] = google.visualization.arrayToDataTable(rowData2018);
 
 let options = {
   title: 'Högerblocket vs Mitten-vänsterblocket - 2022',
@@ -262,9 +251,8 @@ let options = {
   }
 };
 
-let current = 0; // 0 = 2022, 1 = 2018
+let current = 0;
 
-// Skapa en div och en knapp i sidan om inte finns
 let containerId = 'chart-container';
 let buttonId = 'switchButton';
 if (!document.getElementById(containerId)) {
@@ -351,7 +339,6 @@ let partiOptions = {
   }
 };
 
-// Container & knapp för partigraf
 let partContainerId = 'partigraf-container';
 let partButtonId = 'partSwitchButton';
 
@@ -389,7 +376,6 @@ partButton.onclick = function () {
   drawPartiChart();
 };
 
-// Skapa en ny div längst ner
 let kommentarDiv = document.createElement('div');
 kommentarDiv.innerHTML = `<p><b>Sammanfattning:</b><br>-I de 10 kommunerna där män haft störst inkomstökning kan man inte dra slutsatsen att högerblocket fått ökat stöd - tvärtom visar vår graf att stödet sjunkit i nästan alla dessa kommuner.<br>
 Pajala och Övertorneå är de enda kommunerna i vår lista där högerblocket fått ökat stöd, och dessa kommunerna är de enda Norrländska kommunerna i listan.<br>
