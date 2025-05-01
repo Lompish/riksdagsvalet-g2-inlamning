@@ -25,5 +25,28 @@ I vår uppdelning av de politiska blocken har vi i vår undersökning inkluderat
   
 
 * Valdeltagandet är *lägre* i kommuner med låg utbildningsnivå och *högre* i kommuner med hög utbildningsnivå.
+
+<br>
+
+___
+
+### Externa datakällor 
+<br>
+
+**SCB, Statistiska centralbyrån:**
+
+* Utbildningsnivå: [https://www.scb.se/hitta-statistik/sverige-i-siffror/utbildning-jobb-och-pengar/utbildningsnivan-i-sverige/](https://www.scb.se/hitta-statistik/sverige-i-siffror/utbildning-jobb-och-pengar/utbildningsnivan-i-sverige/) 
+
+* Röstberättigade efter ålder: [https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__ME__ME0105__ME0105C/ME0105T28/table/tableViewLayout1/](https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__ME__ME0105__ME0105C/ME0105T28/table/tableViewLayout1/) 
+
+* Röstberättigade efter utbildningsnivå: [https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__ME__ME0105__ME0105C/ME0105T28/table/tableViewLayout1/](https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__ME__ME0105__ME0105C/ME0105T28/table/tableViewLayout1/) 
+
+* Befolkningsstatistik: [https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__BE__BE0101__BE0101A/BefolkManad/](https://www.statistikdatabasen.scb.se/pxweb/sv/ssd/START__BE__BE0101__BE0101A/BefolkManad/)
+
+<br>
+
+**Arbetsförmedlingen:**
+
+* Arbetslöshet: [https://arbetsformedlingen.se/statistik/sok-statistik/tidigare-statistik-tidsserier](https://arbetsformedlingen.se/statistik/sok-statistik/tidigare-statistik-tidsserier) 
  
 `);
