@@ -28,7 +28,9 @@ Detta väcker frågor!
 
 **Låt oss undersöka:**
 
-Även om vi ser en sjunkande trend både här och internationellt #(1) så ligger valdeltagandet i Sverige fortfarande på en mycket hög nivå. Detta bekräftas när vi tittar på den data vi hämtat hem. 
+Även om vi ser en sjunkande trend både här och internationellt [1] så ligger valdeltagandet i Sverige fortfarande på en mycket hög nivå. Detta bekräftas när vi tittar på den data vi hämtat hem. 
+
+
 
 `);
 
@@ -419,9 +421,10 @@ addMdToPage(`
   <br>
 
 
-  **Källor:
+  **Källor:**
 
-  (1) https://www.gp.se/nyheter/varlden/demokratirapport-sverige-samre-an-sina-grannlander.1ec210d0-2b08-4a6a-81ba-86b9d9b09637
+[1]
+https://www.gp.se/nyheter/varlden/demokratirapport-sverige-samre-an-sina-grannlander.1ec210d0-2b08-4a6a-81ba-86b9d9b09637
 
 
 
