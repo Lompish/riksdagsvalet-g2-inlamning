@@ -416,6 +416,11 @@ addMdToPage(`
 
   **Negativa resultat är också resultat**. Förvånande nog tycks vår hypotes inte hålla. Den korrelation vi trodde att vi skulle se verkar inte finnas i den data vi har till hands.
 
+  <br>
+
+
+  **Källor:
+
   (1) https://www.gp.se/nyheter/varlden/demokratirapport-sverige-samre-an-sina-grannlander.1ec210d0-2b08-4a6a-81ba-86b9d9b09637
 
 
